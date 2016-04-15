@@ -160,13 +160,13 @@ void RX5808::scan(uint16_t norm_min, uint16_t norm_max) {
     _wait_rssi();
 
     uint16_t rssi =  _readRSSI();
-#ifdef DEBUG
+#ifdef RXDEBUG
     Serial.print(_chan, DEC);
     Serial.print("\t");
     Serial.print(freq, DEC);
     Serial.print("\t");
     Serial.println(rssi, DEC);
-    delay(1000);
+    delay(500);
 #endif
 
     rssi = constrain(rssi, rssi_min, rssi_max);
@@ -240,33 +240,6 @@ void RX5808::calibration() {
   return;
 }
 
-#ifdef USE_NATIVE_SPI
-//set a certain frequency for the RX module
-void RX5808::setFreq(uint32_t freq) {
-  byte data0 = 0;
-  byte data1 = 0;
-  byte data2 = 0;
-  byte data3 = 0;
-
-  uint32_t Delitel = (freq - 479) / 2;
-
-  byte DelitelH = Delitel >> 5;
-  byte DelitelL = Delitel & 0x1F;
-
-  data0 = DelitelL * 32 + 17;
-  data1 = DelitelH * 16 + DelitelL / 8;
-  data2 = DelitelH / 16;
-  data3 = 0;
-
-  digitalWrite(_csPin, LOW);
-  SPI.transfer(data0);
-  SPI.transfer(data1);
-  SPI.transfer(data2);
-  SPI.transfer(data3);
-  digitalWrite(_csPin, HIGH);
-}
-
-#else //DONT USE NATIVE SPI
 void RX5808::setFreq(uint32_t freq) {
   uint8_t i;
   uint16_t channelData;
@@ -288,85 +261,64 @@ void RX5808::setFreq(uint32_t freq) {
   Serial.println(channelData, HEX);
 #endif
 
+  serialEnable(HIGH);
+  delayMicroseconds(1);
+  serialEnable(LOW);
+  
   //REGISTER 1 - selection
   // bit bash out 25 bits of data
   // Order: A0-3, !R/W, D0-D19
   // A0=0, A1=0, A2=0, A3=1, RW=0, D0-19=0
-  SERIAL_ENABLE_HIGH();
-  delayMicroseconds(1);
-  SERIAL_ENABLE_LOW();
-
-  SERIAL_SENDBIT0();
-  SERIAL_SENDBIT0();
-  SERIAL_SENDBIT0();
-  SERIAL_SENDBIT1();
-
-  SERIAL_SENDBIT0();
-
-  // remaining zeros
-  for (i = 20; i > 0; i--)
-    SERIAL_SENDBIT0();
+  uint16_t reg1 = 0x10;
+  for (i = 0; i < 25; i++)
+    serialSendBit((reg1 >> i) & 1);
 
   // Clock the data in
-  SERIAL_ENABLE_HIGH();
-  //delay(2);
+  serialEnable(HIGH);
   delayMicroseconds(1);
-  SERIAL_ENABLE_LOW();
+  serialEnable(LOW);
 
   // Second is the channel data from the lookup table
   // 20 bytes of register data are sent, but the MSB 4 bits are zeros
   // register address = 0x1, write, data0-15=channelData data15-19=0x0
-  SERIAL_ENABLE_HIGH();
-  SERIAL_ENABLE_LOW();
+  serialEnable(HIGH);
+  serialEnable(LOW);
 
   // Register 0x1
-  SERIAL_SENDBIT1();
-  SERIAL_SENDBIT0();
-  SERIAL_SENDBIT0();
-  SERIAL_SENDBIT0();
+  serialSendBit(HIGH);
+  serialSendBit(LOW);
+  serialSendBit(LOW);
+  serialSendBit(LOW);
 
   // Write to register
-  SERIAL_SENDBIT1();
+  serialSendBit(HIGH);
 
   // D0-D15
   //   note: loop runs backwards as more efficent on AVR
-  for (i = 16; i > 0; i--)
-  {
-    // Is bit high or low?
-    if (channelData & 0x1)
-    {
-      SERIAL_SENDBIT1();
-    }
-    else
-    {
-      SERIAL_SENDBIT0();
-    }
-
+  for (i = 16; i > 0; i--){
+    serialSendBit(channelData & 0x1);
     // Shift bits along to check the next one
     channelData >>= 1;
   }
 
   // Remaining D16-D19
   for (i = 4; i > 0; i--)
-    SERIAL_SENDBIT0();
+    serialSendBit(LOW);
 
   // Finished clocking data in
-  SERIAL_ENABLE_HIGH();
+  serialEnable(HIGH);
   delayMicroseconds(1);
-  //delay(2);
 
   //  digitalWrite(_csPin, LOW);
   digitalWrite(spiClockPin, LOW);
   digitalWrite(spiDataPin, LOW);
 }
 
-
-void RX5808::SERIAL_SENDBIT1()
-{
+void RX5808::serialSendBit(const uint8_t _b) {
   digitalWrite(spiClockPin, LOW);
   delayMicroseconds(1);
 
-  digitalWrite(spiDataPin, HIGH);
+  digitalWrite(spiDataPin, _b);
   delayMicroseconds(1);
   digitalWrite(spiClockPin, HIGH);
   delayMicroseconds(1);
@@ -374,32 +326,8 @@ void RX5808::SERIAL_SENDBIT1()
   digitalWrite(spiClockPin, LOW);
   delayMicroseconds(1);
 }
-
-void RX5808::SERIAL_SENDBIT0()
-{
-  digitalWrite(spiClockPin, LOW);
+void RX5808::serialEnable(const uint8_t _lev) {
   delayMicroseconds(1);
-
-  digitalWrite(spiDataPin, LOW);
-  delayMicroseconds(1);
-  digitalWrite(spiClockPin, HIGH);
-  delayMicroseconds(1);
-
-  digitalWrite(spiClockPin, LOW);
+  digitalWrite(_csPin, _lev);
   delayMicroseconds(1);
 }
-
-void RX5808::SERIAL_ENABLE_LOW()
-{
-  delayMicroseconds(1);
-  digitalWrite(_csPin, LOW);
-  delayMicroseconds(1);
-}
-
-void RX5808::SERIAL_ENABLE_HIGH()
-{
-  delayMicroseconds(1);
-  digitalWrite(_csPin, HIGH);
-  delayMicroseconds(1);
-}
-#endif

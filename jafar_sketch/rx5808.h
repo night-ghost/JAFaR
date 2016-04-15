@@ -23,6 +23,10 @@ This file is part of Fatshark© goggle rx module project (JAFaR).
 #include "Arduino.h"
 #include "const.h"
 
+//default values used for calibration
+uint16_t rssi_min = 1024;
+uint16_t rssi_max = 0;
+
 class RX5808
 {
   public:
@@ -50,12 +54,8 @@ class RX5808
     uint8_t _stop_scan;
     uint16_t scanVec[CHANNEL_MAX];
 
-#ifndef USE_NATIVE_SPI
-    void SERIAL_ENABLE_HIGH();
-    void SERIAL_ENABLE_LOW();
-    void SERIAL_SENDBIT0();
-    void SERIAL_SENDBIT1();
-#endif
+    void serialEnable(const uint8_t);
+    void  serialSendBit(const uint8_t);
 
 };
 
