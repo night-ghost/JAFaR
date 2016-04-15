@@ -20,7 +20,6 @@ This file is part of Fatshark© goggle rx module project (JAFaR).
 #ifndef const_h
 #define const_h
 
-//#define USE_DIVERSITY
 //#define DEBUG
 
 #define CH1 2
@@ -38,14 +37,32 @@ This file is part of Fatshark© goggle rx module project (JAFaR).
 
 #define BIN_H 70
 
+//diplay dependant
+#define D_COL 120
+#define D_ROW 96
+#define MENU_Y_SIZE 12
+
 #define CHANNEL_MAX 40
 #define CHANNEL_MIN 0
 
+//SPI related
+#define spiDataPin 11
+#define spiClockPin 13
 
-#define SPI_CSB 10//receiver SPI Select pin
-#define rssiB A2  //RSSI input
+#define SPI_CSA 10//receiver SPI Select pin
+#define rssiA A2  //RSSI input
 
-//#define Voltage A3 //Voltage divider input
+#define SPI_CSB 8//receiver SPI Select pin
+#define rssiB A1  //RSSI input
+
+#define SW_CTRL1 5
+#define SW_CTRL2 6
+
+#define SELECT_OSD {digitalWrite(SW_CTRL1, HIGH);digitalWrite(SW_CTRL2, HIGH);}
+#define SELECT_A {digitalWrite(SW_CTRL1, LOW);  digitalWrite(SW_CTRL2, HIGH);}
+#define SELECT_B {digitalWrite(SW_CTRL1, HIGH);  digitalWrite(SW_CTRL2, LOW);}
+
+#define RX_HYST 15 //~10%
 
 // Channels with their Mhz Values
 const uint16_t channelFreqTable[] PROGMEM = {
@@ -69,7 +86,5 @@ const uint8_t channelNames[] PROGMEM = {
   0xF1, 0xF2, 0xF3, 0xF4, 0xF5, 0xF6, 0xF7, 0xF8,
   0xC1, 0xC2, 0xC3, 0xC4, 0xC5, 0xC6, 0xC7, 0xC8
 };
-
-
 
 #endif

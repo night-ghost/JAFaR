@@ -28,17 +28,7 @@ This file is part of Fatshark© goggle rx module project (JAFaR).
 
 TVout TV;
 
-RX5808 rx5808(rssiB, SPI_CSB);
-
-//uint8_t curr_channel = 0;
-//uint32_t curr_freq;
-
-//uint32_t last_irq;
-//uint8_t changing_freq, changing_mode;
-
-//default values used for calibration
-uint16_t rssi_min = 1024;
-uint16_t rssi_max = 0;
+RX5808 rx5808(rssiA, SPI_CSA);
 
 char buf[30];
 uint8_t last_post_switch;
@@ -46,39 +36,41 @@ char timer;
 
 uint8_t do_nothing;
 
-uint16_t last_used_freq, last_used_band, last_used_freq_id ;
+uint16_t last_used_freq, last_used_band, last_used_freq_id;
 
 void setup() {
-  // Serial.begin(9600);
-
-  //video out init
-  pinMode(5, OUTPUT);
-  digitalWrite(5, HIGH);
-
-  //initialize SPI
-#ifdef USE_NATIVE_SPI
-  SPI.begin();
-  SPI.setBitOrder(LSBFIRST);
-#else
-#define spiDataPin 11
-#define spiClockPin 13
-  pinMode(spiDataPin, OUTPUT);
-  pinMode(spiClockPin, OUTPUT);
+#ifdef DEBUG
+  Serial.begin(9600);
 #endif
 
+  //video out init
+  pinMode(SW_CTRL1, OUTPUT);
+  pinMode(SW_CTRL2, OUTPUT);
+  SELECT_OSD;
+
+  //initialize SPI
+  pinMode(spiDataPin, OUTPUT);
+  pinMode(spiClockPin, OUTPUT);
+
+  //RX module init
   rx5808.init();
   //rx5808.calibration();
 
   //tv init
-  TV.begin(PAL, 120, 96);
+  TV.begin(PAL, D_COL, D_ROW);
   TV.select_font(font6x8);
+
+  //splash screen
   TV.clear_screen();
-  TV.print(0, 0, "FPVR FATSHARK\nRX MODULE - V0.01\nby MikyM0use");
+  TV.print(0, 0, "FPVR FATSHARK\nRX MODULE - V0.01\nby MikyM0use\n\n");
+  TV.print(0, 50, "RSSI MIN");
+  TV.println(60, 50, rssi_min, DEC); //RSSI
+  TV.print(0, 60, "RSSI MAX");
+  TV.println(60, 60, rssi_max, DEC); //RSSI
 
   delay(5000);
 
   last_post_switch = -1; //init menu position
-
   do_nothing = 0;
 
   last_used_band = EEPROM.read(EEPROM_ADDR_LAST_BAND_ID); //channel name
@@ -86,35 +78,42 @@ void setup() {
   last_used_freq = pgm_read_word_near(channelFreqTable + (8 * last_used_band) + last_used_freq_id); //freq
 }
 
-#define MENU_Y_SIZE 12
-
 inline uint8_t readSwitch() {
   return 0x7 - ((digitalRead(CH3) << 2) | (digitalRead(CH2) << 1) | digitalRead(CH1));
 }
 
-void autoscan() {
-  //  if (changing_freq || changing_mode) {
-  //changing_freq = changing_mode = 0;
+void autoscan() { //TODO BETA VERSION! diversity not supported
+  RX5808 rx5808B(rssiB, SPI_CSB);
+  rx5808B.init();
+
   rx5808.scan(1, BIN_H);
   uint32_t curr_freq = pgm_read_word_near(channelFreqTable + rx5808.getMaxPos());
-  use_freq(curr_freq);
-  // rx5808.setFreq(curr_freq);
-  // }
+  use_freq(curr_freq, rx5808, rx5808B);
 
-  //digitalWrite(5, LOW);
-  //do_nothing = 1;
+  SELECT_A;
 }
 
-void use_freq(uint32_t freq) {
+void use_freq(uint32_t freq, RX5808 rx5808, RX5808 rx5808B) {
   rx5808.setFreq(freq);
+  rx5808B.setFreq(freq);
 
-  digitalWrite(5, LOW);
   do_nothing = 1;
 }
 
+#define RX_A 1
+#define RX_B 0
+
 void set_and_wait(uint8_t band, uint8_t menu_pos) {
 
-  use_freq(pgm_read_word_near(channelFreqTable + (8 * band) + menu_pos)); //set the selected freq
+  //init of the second module
+  RX5808 rx5808B(rssiB, SPI_CSB);
+  rx5808B.init();
+  use_freq(pgm_read_word_near(channelFreqTable + (8 * band) + menu_pos), rx5808, rx5808B); //set the selected freq
+  SELECT_B;
+  //delay(500);
+  //use_freq(pgm_read_word_near(channelFreqTable + (8 * band) + menu_pos), rx5808); //set the selected freq
+
+  u8 current_rx = RX_B;
 
   //save band and freq as "last used"
   EEPROM.write(EEPROM_ADDR_LAST_FREQ_ID, menu_pos); //freq id
@@ -122,17 +121,48 @@ void set_and_wait(uint8_t band, uint8_t menu_pos) {
 
   //change channel during normal usage
   while (1) {
+    unsigned rssi_a = rx5808.getCurrentRSSI();
+    unsigned rssi_b = rx5808B.getCurrentRSSI();
+
+#ifdef DEBUG
+    Serial.print("A: ");
+    Serial.print(rssi_a, DEC);
+
+    Serial.print("\tB: ");
+    Serial.print(rssi_b, DEC);
+
+    Serial.print("\twe are using: ");
+    if (current_rx == RX_A) {
+      Serial.print("\tA");
+      Serial.print("\twe change at: ");
+      Serial.println(rssi_a + RX_HYST, DEC);
+    } else {
+      Serial.print("\tB");
+      Serial.print("\twe change at: ");
+      Serial.println(rssi_b + RX_HYST, DEC);
+    }
+    delay(500);
+#endif
+
+    if (current_rx == RX_B && rssi_a > rssi_b + RX_HYST) {
+      SELECT_A;
+      current_rx = RX_A;
+    }
+
+    if (current_rx == RX_A && rssi_b > rssi_a + RX_HYST) {
+      SELECT_B;
+      current_rx = RX_B;
+    }
+
     menu_pos = readSwitch();
 
     if (last_post_switch != menu_pos) { //something changed by user
-      use_freq(pgm_read_word_near(channelFreqTable + (8 * band) + menu_pos)); //set the selected freq
+      use_freq(pgm_read_word_near(channelFreqTable + (8 * band) + menu_pos), rx5808, rx5808B); //set the selected freq
       EEPROM.write(EEPROM_ADDR_LAST_FREQ_ID, menu_pos);
     }
     last_post_switch = menu_pos;
   }
-
 }
-
 
 void submenu(uint8_t pos) {
   timer = 9;
@@ -165,6 +195,8 @@ void submenu(uint8_t pos) {
     delay(2000);
   }
 
+  TV.clear_screen();
+  TV.printPGM(0, 50, PSTR("SETTING\nFREQUENCY..."));
   set_and_wait(band, menu_pos);
 }
 
@@ -175,9 +207,9 @@ void scanner_mode() {
     TV.clear_screen();
     TV.draw_rect(1, 1, 100, 94,  WHITE);
     TV.select_font(font4x6);
-    TV.print(5, 87, "5645");
-    TV.print(45, 87, "5800");
-    TV.print(85, 87, "5945");
+    TV.printPGM(5, 87, PSTR("5645"));
+    TV.printPGM(45, 87, PSTR("5800"));
+    TV.printPGM(85, 87, PSTR("5945"));
 
     TV.select_font(font6x8);
     for (int i = CHANNEL_MIN; i < CHANNEL_MAX; i++) {
@@ -224,12 +256,10 @@ void loop(void) {
 
   //MAIN MENU
   TV.clear_screen();
-  // simple menu
   TV.select_font(font6x8);
   TV.draw_rect(1, 1, 100, 94,  WHITE);
 
   //header and countdown
-  // TV.printPGM(10, 3, PSTR("SELECT BAND"));
   TV.println(92, 3, timer, DEC);
 
   //last used band,freq
