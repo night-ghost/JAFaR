@@ -21,6 +21,7 @@ This file is part of Fatshark© goggle rx module project (JAFaR).
 #define const_h
 
 //#define DEBUG
+#define ENABLE_RSSILOG
 
 #define CH1 2
 #define CH2 3
@@ -34,6 +35,8 @@ This file is part of Fatshark© goggle rx module project (JAFaR).
 
 #define EEPROM_ADDR_LAST_BAND_ID 15
 #define EEPROM_ADDR_LAST_FREQ_ID 16
+
+#define EEPROM_ADDR_START_LOG 20
 
 #define BIN_H 70
 

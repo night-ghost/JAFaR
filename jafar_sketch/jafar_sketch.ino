@@ -62,7 +62,7 @@ void setup() {
 
   //splash screen
   TV.clear_screen();
-  TV.print(0, 0, "FPVR FATSHARK\nRX MODULE - V0.01\nby MikyM0use\n\n");
+  TV.print(0, 0, "FPVR FATSHARK\nRX MODULE - V0.02\nby MikyM0use\n\n");
   TV.print(0, 50, "RSSI MIN");
   TV.println(60, 50, rssi_min, DEC); //RSSI
   TV.print(0, 60, "RSSI MAX");
@@ -104,25 +104,49 @@ void use_freq(uint32_t freq, RX5808 rx5808, RX5808 rx5808B) {
 #define RX_B 0
 
 void set_and_wait(uint8_t band, uint8_t menu_pos) {
+  unsigned rssi_b, rssi_a;
 
   //init of the second module
   RX5808 rx5808B(rssiB, SPI_CSB);
   rx5808B.init();
   use_freq(pgm_read_word_near(channelFreqTable + (8 * band) + menu_pos), rx5808, rx5808B); //set the selected freq
   SELECT_B;
-  //delay(500);
-  //use_freq(pgm_read_word_near(channelFreqTable + (8 * band) + menu_pos), rx5808); //set the selected freq
 
   u8 current_rx = RX_B;
+
+  //clear memory for log
+#ifdef ENABLE_RSSILOG
+  uint8_t sample = 0;
+  long g_log_offset = 0;
+  for (g_log_offset = 0 ; g_log_offset < EEPROM.length() / 2 ; g_log_offset++) {
+    EEPROM.write(EEPROM_ADDR_START_LOG + g_log_offset, 0);
+  }
+  g_log_offset = 0;
+#endif
 
   //save band and freq as "last used"
   EEPROM.write(EEPROM_ADDR_LAST_FREQ_ID, menu_pos); //freq id
   EEPROM.write(EEPROM_ADDR_LAST_BAND_ID, band); //channel name
 
-  //change channel during normal usage
+  //MAIN LOOP - change channel and log
   while (1) {
-    unsigned rssi_a = rx5808.getCurrentRSSI();
-    unsigned rssi_b = rx5808B.getCurrentRSSI();
+    rssi_a = rx5808.getCurrentRSSI();
+    rssi_b = rx5808B.getCurrentRSSI();
+
+#ifdef ENABLE_RSSILOG
+    //every loop cycle requires ~100ms
+    //total memory available is 492B (512-20) and every sample is 2B -> 246 sample in total
+    //if we take 2 sample per seconds we have 123 seconds of recording (~2 minutes)
+    if (++sample >= 2) {
+      sample = 0;
+
+      //FORMAT IS XXXXXXXRYYYYYYYY (i.e. 7bit for RSSI_B - 1bit for RX used - 8bit for RSSI_A
+      if (g_log_offset < EEPROM.length() / 2)
+        EEPROM.put(EEPROM_ADDR_START_LOG + g_log_offset, ((uint16_t)(((rssi_b & 0xFE) | (current_rx & 0x1)) & 0xFF) << 8) | (rssi_a & 0xFF));
+
+      g_log_offset += sizeof(uint16_t);
+    }
+#endif
 
 #ifdef DEBUG
     Serial.print("A: ");
@@ -161,7 +185,9 @@ void set_and_wait(uint8_t band, uint8_t menu_pos) {
       EEPROM.write(EEPROM_ADDR_LAST_FREQ_ID, menu_pos);
     }
     last_post_switch = menu_pos;
-  }
+
+  } //end of loop
+
 }
 
 void submenu(uint8_t pos) {

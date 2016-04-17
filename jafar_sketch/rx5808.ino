@@ -141,6 +141,9 @@ void RX5808::init() {
     SPI.transfer(0x00);
     digitalWrite(_csPin, HIGH);
   */
+  if (abs(rssi_max-rssi_min > 300) || abs(rssi_max-rssi_min < 50))
+    calibration();
+
   scan(1, BIN_H);
 }
 
@@ -264,7 +267,7 @@ void RX5808::setFreq(uint32_t freq) {
   serialEnable(HIGH);
   delayMicroseconds(1);
   serialEnable(LOW);
-  
+
   //REGISTER 1 - selection
   // bit bash out 25 bits of data
   // Order: A0-3, !R/W, D0-D19
@@ -295,7 +298,7 @@ void RX5808::setFreq(uint32_t freq) {
 
   // D0-D15
   //   note: loop runs backwards as more efficent on AVR
-  for (i = 16; i > 0; i--){
+  for (i = 16; i > 0; i--) {
     serialSendBit(channelData & 0x1);
     // Shift bits along to check the next one
     channelData >>= 1;
