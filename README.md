@@ -20,3 +20,9 @@ https://docs.google.com/spreadsheets/d/1-763imBV3QsQ71GKDZH-BirTz1k32szNuJZUKQrE
 
 DIVERSITY MODULE BOM
 https://docs.google.com/spreadsheets/d/1xEpQe3_p0bN-8RNdvx7PaL_biuvL8IJB6aDtJCb4B00/edit?usp=sharing
+
+##Donations:
+
+Hardware or paypal donations to carry on the project are always accepted.
+
+[![paypal](https://www.paypalobjects.com/it_IT/IT/i/btn/btn_donateCC_LG.gif)](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=YKP2PH72RKPRY)
