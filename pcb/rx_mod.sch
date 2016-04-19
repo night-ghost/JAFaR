@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!DOCTYPE eagle SYSTEM "eagle.dtd">
-<eagle version="7.4.0">
+<eagle version="7.5.0">
 <drawing>
 <settings>
 <setting alwaysvectorfont="no"/>
@@ -161,7 +161,6 @@
 <smd name="GND4" x="0" y="6.18" dx="3" dy="1.3" layer="1"/>
 <smd name="RSSI" x="28" y="13.8" dx="3" dy="1.3" layer="1"/>
 <smd name="VIDEO" x="28" y="18.88" dx="3" dy="1.3" layer="1"/>
-<text x="9.97" y="11.09" size="1.9304" layer="21">RX5808</text>
 <text x="24.6" y="1.1" size="1.016" layer="21" align="center">CH1</text>
 <text x="24.6" y="3.64" size="1.016" layer="21" align="center">CH2</text>
 <text x="24.6" y="6.18" size="1.016" layer="21" align="center">CH3</text>
@@ -7422,8 +7421,8 @@ W = angled&lt;p&gt;
 <pad name="ANT" x="-0.02" y="-0.017" drill="1.37"/>
 <pad name="P$1" x="-2.67" y="2.743" drill="1.3" shape="square"/>
 <pad name="P$2" x="2.64" y="2.743" drill="1.3" shape="square"/>
-<pad name="P$3" x="-2.67" y="-0.017" drill="1.3" shape="square"/>
-<pad name="P$4" x="2.64" y="-0.017" drill="1.3" shape="square"/>
+<pad name="P$3" x="-2.67" y="-0.017" drill="1.6" shape="square"/>
+<pad name="P$4" x="2.64" y="-0.017" drill="1.6" shape="square"/>
 </package>
 </packages>
 <symbols>
@@ -10428,8 +10427,8 @@ Metric Code Size 5664</description>
 <part name="P+7" library="SparkFun" deviceset="3.3V" device="" value="VCC"/>
 <part name="XTAL1" library="CSTCE16M0V53-R0" deviceset="CSTCE16M0V53-R0" device=""/>
 <part name="U$1" library="#fpv" deviceset="SMA_ANTENNA" device=""/>
-<part name="C1" library="SparkFun-Passives" deviceset="CAP_POL" device="7343"/>
-<part name="C2" library="SparkFun-Passives" deviceset="CAP_POL" device="7343"/>
+<part name="C1" library="SparkFun-Passives" deviceset="CAP_POL" device="7343" value="470uf"/>
+<part name="C2" library="SparkFun-Passives" deviceset="CAP_POL" device="7343" value="470uf"/>
 <part name="P+8" library="SparkFun" deviceset="3.3V" device="" value="VCC"/>
 <part name="GND16" library="supply1" deviceset="GND" device=""/>
 <part name="P+3" library="SparkFun" deviceset="3.3V" device="" value="VCC"/>
@@ -10444,7 +10443,7 @@ Metric Code Size 5664</description>
 <part name="GND17" library="supply1" deviceset="GND" device=""/>
 <part name="R_LED2" library="rcl" deviceset="R-US_" device="R0603" value="330"/>
 <part name="LED_2" library="led" deviceset="LED" device="SML0603"/>
-<part name="C3" library="adafruit" deviceset="C-US" device="C0603"/>
+<part name="C3" library="adafruit" deviceset="C-US" device="C0603" value="0.1uf"/>
 <part name="GND18" library="supply1" deviceset="GND" device=""/>
 </parts>
 <sheets>
