@@ -3254,90 +3254,28 @@ Source: http://focus.ti.com/lit/ds/symlink/tps77001.pdf</description>
 <text x="-7.62" y="8.89" size="1.778" layer="95">&gt;NAME</text>
 <text x="-7.62" y="-10.16" size="1.778" layer="96">&gt;VALUE</text>
 <pin name="IN" x="-10.16" y="5.08" length="short" direction="in"/>
-<pin name="!EN" x="-10.16" y="0" length="short" direction="in"/>
+<pin name="EN" x="-10.16" y="0" length="short" direction="in"/>
 <pin name="NC/FB" x="12.7" y="-5.08" length="short" direction="pas" rot="R180"/>
 <pin name="OUT" x="12.7" y="5.08" length="short" direction="pas" rot="R180"/>
 <pin name="GND" x="-10.16" y="-5.08" length="short" direction="pwr"/>
 </symbol>
 </symbols>
 <devicesets>
-<deviceset name="TPS770*" prefix="IC">
-<description>&lt;b&gt;ULTRALOW-POWER 50-mA LOW-DROPOUT LINEAR REGULATORS&lt;/b&gt;&lt;p&gt;
-50-mA Low-Dropout Regulator&lt;br&gt;
-Source: http://focus.ti.com/lit/ds/symlink/tps77001.pdf</description>
+<deviceset name="REG113">
 <gates>
 <gate name="G$1" symbol="TPS770XX" x="0" y="0"/>
 </gates>
 <devices>
 <device name="" package="SOT23-DBV">
 <connects>
-<connect gate="G$1" pin="!EN" pad="3"/>
+<connect gate="G$1" pin="EN" pad="3"/>
 <connect gate="G$1" pin="GND" pad="2"/>
 <connect gate="G$1" pin="IN" pad="1"/>
 <connect gate="G$1" pin="NC/FB" pad="4"/>
 <connect gate="G$1" pin="OUT" pad="5"/>
 </connects>
 <technologies>
-<technology name="01">
-<attribute name="MF" value="TEXAS INSTRUMENTS" constant="no"/>
-<attribute name="MPN" value="TPS77001DBVT" constant="no"/>
-<attribute name="OC_FARNELL" value="8461554" constant="no"/>
-<attribute name="OC_NEWARK" value="77C1171" constant="no"/>
-</technology>
-<technology name="12">
-<attribute name="MF" value="TEXAS INSTRUMENT CONNECTORS" constant="no"/>
-<attribute name="MPN" value="TPS77012DBVR" constant="no"/>
-<attribute name="OC_FARNELL" value="1412877" constant="no"/>
-<attribute name="OC_NEWARK" value="77C1172" constant="no"/>
-</technology>
-<technology name="15">
-<attribute name="MF" value="TEXAS INSTRUMENT CONNECTORS" constant="no"/>
-<attribute name="MPN" value="TPS77015DBVT" constant="no"/>
-<attribute name="OC_FARNELL" value="1412879" constant="no"/>
-<attribute name="OC_NEWARK" value="77C1175" constant="no"/>
-</technology>
-<technology name="18">
-<attribute name="MF" value="TEXAS INSTRUMENT CONNECTORS" constant="no"/>
-<attribute name="MPN" value="TPS77018DBVR" constant="no"/>
-<attribute name="OC_FARNELL" value="1575745" constant="no"/>
-<attribute name="OC_NEWARK" value="77C1176" constant="no"/>
-</technology>
-<technology name="25">
-<attribute name="MF" value="TEXAS INSTRUMENTS" constant="no"/>
-<attribute name="MPN" value="TPS77025DBVR" constant="no"/>
-<attribute name="OC_FARNELL" value="1412881" constant="no"/>
-<attribute name="OC_NEWARK" value="77C1178" constant="no"/>
-</technology>
-<technology name="27">
-<attribute name="MF" value="TEXAS INSTRUMENT CONNECTORS" constant="no"/>
-<attribute name="MPN" value="TPS77027DBVT" constant="no"/>
-<attribute name="OC_FARNELL" value="1510191" constant="no"/>
-<attribute name="OC_NEWARK" value="77C1181" constant="no"/>
-</technology>
-<technology name="28">
-<attribute name="MF" value="TEXAS INSTRUMENT CONNECTORS" constant="no"/>
-<attribute name="MPN" value="TPS77028DBVR" constant="no"/>
-<attribute name="OC_FARNELL" value="1412882" constant="no"/>
-<attribute name="OC_NEWARK" value="77C1182" constant="no"/>
-</technology>
-<technology name="30">
-<attribute name="MF" value="TEXAS INSTRUMENTS" constant="no"/>
-<attribute name="MPN" value="TPS77030DBVT" constant="no"/>
-<attribute name="OC_FARNELL" value="1207348" constant="no"/>
-<attribute name="OC_NEWARK" value="77C1185" constant="no"/>
-</technology>
-<technology name="33">
-<attribute name="MF" value="TEXAS INSTRUMENTS" constant="no"/>
-<attribute name="MPN" value="TPS77033DBVT" constant="no"/>
-<attribute name="OC_FARNELL" value="8461570" constant="no"/>
-<attribute name="OC_NEWARK" value="77C1187" constant="no"/>
-</technology>
-<technology name="50">
-<attribute name="MF" value="TEXAS INSTRUMENT CONNECTORS" constant="no"/>
-<attribute name="MPN" value="TPS77050DBVT" constant="no"/>
-<attribute name="OC_FARNELL" value="1412883" constant="no"/>
-<attribute name="OC_NEWARK" value="77C1189" constant="no"/>
-</technology>
+<technology name=""/>
 </technologies>
 </device>
 </devices>
@@ -5357,7 +5295,7 @@ Source: www.kingbright.com</description>
 <part name="JP3" library="SparkFun-Connectors" deviceset="M07" device=""/>
 <part name="R1" library="SparkFun-Passives" deviceset="RESISTOR" device="0805-RES"/>
 <part name="IC2" library="74xx-little-de" deviceset="74*1G126" device="DBV" technology="AHC" value="74AHC1G126DBV"/>
-<part name="IC1" library="texas" deviceset="TPS770*" device="" technology="50"/>
+<part name="IC1" library="texas" deviceset="REG113" device=""/>
 <part name="SJ2" library="jumper" deviceset="SJ" device=""/>
 <part name="JP1" library="SparkFun-Connectors" deviceset="POWER_JACK" device="SLT"/>
 <part name="U$3" library="SparkFun-Connectors" deviceset="EB-85A" device="SMD"/>
@@ -5685,7 +5623,7 @@ Source: www.kingbright.com</description>
 <junction x="121.92" y="99.06"/>
 </segment>
 <segment>
-<pinref part="IC1" gate="G$1" pin="!EN"/>
+<pinref part="IC1" gate="G$1" pin="EN"/>
 <wire x1="228.6" y1="147.32" x2="215.9" y2="147.32" width="0.1524" layer="91"/>
 <label x="210.82" y="147.32" size="1.778" layer="95"/>
 <pinref part="R3" gate="G$1" pin="2"/>
