@@ -14,16 +14,16 @@ The project is mainly divided into two PCBs:
 the main module is usable alone as a 40ch receiver module, but if you connect the second external module, 
 the microcontroller onboard can decide which one to use based on the received signal strength. 
 
-<img src="/docs/base_front.jpg" />
-<img src="/docs/base_back.jpg" />
+<img src="/docs/base_front.jpg" width="50%" height="50%" />
+<img src="/docs/base_back.jpg" width="50%" height="50%" />
 
 MAIN MODULE BOM
 https://docs.google.com/spreadsheets/d/1-763imBV3QsQ71GKDZH-BirTz1k32szNuJZUKQrE00g/edit?usp=sharing
 
 on the base module the frequency is set by the user using an OSD menu. 
 
-<img src="/docs/diversity_front.jpg" />
-<img src="/docs/diversity_back.jpg" />
+<img src="/docs/diversity_front.jpg" width="50%" height="50%" />
+<img src="/docs/diversity_back.jpg" width="50%" height="50%" />
 
 DIVERSITY MODULE BOM
 https://docs.google.com/spreadsheets/d/1xEpQe3_p0bN-8RNdvx7PaL_biuvL8IJB6aDtJCb4B00/edit?usp=sharing
