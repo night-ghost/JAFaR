@@ -5995,6 +5995,7 @@ http://mitarbeiter.hs-heilbronn.de/~rbayer/&lt;/i&gt;&lt;/p&gt;</description>
 <part name="GND12" library="supply1" deviceset="GND" device=""/>
 <part name="SJ1" library="jumper" deviceset="SJ" device=""/>
 <part name="P+1" library="SparkFun" deviceset="3.3V" device="" value="VCC"/>
+<part name="R4" library="SparkFun-Passives" deviceset="RESISTOR" device="0805-RES" value="100k"/>
 </parts>
 <sheets>
 <sheet>
@@ -6029,20 +6030,21 @@ http://mitarbeiter.hs-heilbronn.de/~rbayer/&lt;/i&gt;&lt;/p&gt;</description>
 <instance part="STAT" gate="G$1" x="284.48" y="134.62"/>
 <instance part="P+3" gate="G$1" x="284.48" y="157.48"/>
 <instance part="GND6" gate="1" x="284.48" y="121.92"/>
-<instance part="R3" gate="G$1" x="215.9" y="142.24" rot="R90"/>
-<instance part="GND7" gate="1" x="215.9" y="132.08"/>
+<instance part="R3" gate="G$1" x="220.98" y="142.24" rot="R90"/>
+<instance part="GND7" gate="1" x="220.98" y="132.08"/>
 <instance part="IC3" gate="G$1" x="116.84" y="83.82" smashed="yes">
 <attribute name="NAME" x="119.38" y="89.535" size="1.778" layer="95"/>
 </instance>
 <instance part="GND19" gate="1" x="114.3" y="71.12"/>
 <instance part="P+5" gate="G$1" x="114.3" y="93.98"/>
 <instance part="V1" gate="G$1" x="241.3" y="147.32"/>
-<instance part="C2" gate="G$1" x="203.2" y="142.24"/>
-<instance part="GND2" gate="1" x="203.2" y="132.08"/>
+<instance part="C2" gate="G$1" x="190.5" y="142.24"/>
+<instance part="GND2" gate="1" x="190.5" y="132.08"/>
 <instance part="JP2" gate="G$1" x="162.56" y="91.44"/>
 <instance part="GND12" gate="1" x="182.88" y="86.36"/>
 <instance part="SJ1" gate="1" x="114.3" y="43.18"/>
 <instance part="P+1" gate="G$1" x="134.62" y="48.26"/>
+<instance part="R4" gate="G$1" x="213.36" y="147.32" rot="R180"/>
 </instances>
 <busses>
 </busses>
@@ -6125,7 +6127,7 @@ http://mitarbeiter.hs-heilbronn.de/~rbayer/&lt;/i&gt;&lt;/p&gt;</description>
 <segment>
 <pinref part="R3" gate="G$1" pin="1"/>
 <pinref part="GND7" gate="1" pin="GND"/>
-<wire x1="215.9" y1="134.62" x2="215.9" y2="137.16" width="0.1524" layer="91"/>
+<wire x1="220.98" y1="134.62" x2="220.98" y2="137.16" width="0.1524" layer="91"/>
 </segment>
 <segment>
 <pinref part="IC3" gate="G$1" pin="V-"/>
@@ -6135,7 +6137,7 @@ http://mitarbeiter.hs-heilbronn.de/~rbayer/&lt;/i&gt;&lt;/p&gt;</description>
 <segment>
 <pinref part="GND2" gate="1" pin="GND"/>
 <pinref part="C2" gate="G$1" pin="2"/>
-<wire x1="203.2" y1="134.62" x2="203.2" y2="139.7" width="0.1524" layer="91"/>
+<wire x1="190.5" y1="134.62" x2="190.5" y2="139.7" width="0.1524" layer="91"/>
 </segment>
 <segment>
 <pinref part="JP2" gate="G$1" pin="1"/>
@@ -6311,30 +6313,13 @@ http://mitarbeiter.hs-heilbronn.de/~rbayer/&lt;/i&gt;&lt;/p&gt;</description>
 </net>
 <net name="ENABLE" class="0">
 <segment>
-<wire x1="154.94" y1="157.48" x2="170.18" y2="157.48" width="0.1524" layer="91"/>
-<pinref part="JP3" gate="G$1" pin="7"/>
-<junction x="154.94" y="157.48"/>
-<label x="154.94" y="157.48" size="1.778" layer="95"/>
-</segment>
-<segment>
-<wire x1="101.6" y1="157.48" x2="116.84" y2="157.48" width="0.1524" layer="91"/>
-<label x="104.14" y="157.48" size="1.778" layer="95"/>
-<pinref part="U$3" gate="G$1" pin="PPS"/>
-<junction x="101.6" y="157.48"/>
-</segment>
-<segment>
-<wire x1="226.06" y1="147.32" x2="215.9" y2="147.32" width="0.1524" layer="91"/>
-<label x="210.82" y="147.32" size="1.778" layer="95"/>
+<wire x1="226.06" y1="147.32" x2="220.98" y2="147.32" width="0.1524" layer="91"/>
 <pinref part="R3" gate="G$1" pin="2"/>
-<wire x1="215.9" y1="147.32" x2="210.82" y2="147.32" width="0.1524" layer="91"/>
-<junction x="215.9" y="147.32"/>
 <pinref part="V1" gate="G$1" pin="EN"/>
 <junction x="226.06" y="147.32"/>
-</segment>
-<segment>
-<pinref part="SJ1" gate="1" pin="1"/>
-<wire x1="109.22" y1="43.18" x2="88.9" y2="43.18" width="0.1524" layer="91"/>
-<label x="93.98" y="43.18" size="1.778" layer="95"/>
+<pinref part="R4" gate="G$1" pin="1"/>
+<wire x1="218.44" y1="147.32" x2="220.98" y2="147.32" width="0.1524" layer="91"/>
+<junction x="220.98" y="147.32"/>
 </segment>
 </net>
 <net name="RSSI_MOD" class="0">
@@ -6363,14 +6348,14 @@ http://mitarbeiter.hs-heilbronn.de/~rbayer/&lt;/i&gt;&lt;/p&gt;</description>
 <label x="182.88" y="116.84" size="1.778" layer="95"/>
 </segment>
 <segment>
-<wire x1="226.06" y1="152.4" x2="203.2" y2="152.4" width="0.1524" layer="91"/>
-<label x="193.04" y="152.4" size="1.778" layer="95"/>
+<wire x1="226.06" y1="152.4" x2="190.5" y2="152.4" width="0.1524" layer="91"/>
+<label x="185.42" y="152.4" size="1.778" layer="95"/>
 <pinref part="V1" gate="G$1" pin="IN"/>
 <junction x="226.06" y="152.4"/>
 <pinref part="C2" gate="G$1" pin="1"/>
-<wire x1="203.2" y1="147.32" x2="203.2" y2="152.4" width="0.1524" layer="91"/>
-<wire x1="203.2" y1="152.4" x2="195.58" y2="152.4" width="0.1524" layer="91"/>
-<junction x="203.2" y="152.4"/>
+<wire x1="190.5" y1="147.32" x2="190.5" y2="152.4" width="0.1524" layer="91"/>
+<wire x1="190.5" y1="152.4" x2="187.96" y2="152.4" width="0.1524" layer="91"/>
+<junction x="190.5" y="152.4"/>
 </segment>
 <segment>
 <pinref part="JP2" gate="G$1" pin="2"/>
@@ -6383,6 +6368,30 @@ http://mitarbeiter.hs-heilbronn.de/~rbayer/&lt;/i&gt;&lt;/p&gt;</description>
 <pinref part="R2" gate="G$1" pin="1"/>
 <pinref part="STAT" gate="G$1" pin="A"/>
 <wire x1="284.48" y1="142.24" x2="284.48" y2="137.16" width="0.1524" layer="91"/>
+</segment>
+</net>
+<net name="ENABLE_P" class="0">
+<segment>
+<wire x1="154.94" y1="157.48" x2="170.18" y2="157.48" width="0.1524" layer="91"/>
+<pinref part="JP3" gate="G$1" pin="7"/>
+<junction x="154.94" y="157.48"/>
+<label x="154.94" y="157.48" size="1.778" layer="95"/>
+</segment>
+<segment>
+<wire x1="101.6" y1="157.48" x2="116.84" y2="157.48" width="0.1524" layer="91"/>
+<label x="104.14" y="157.48" size="1.778" layer="95"/>
+<pinref part="U$3" gate="G$1" pin="PPS"/>
+<junction x="101.6" y="157.48"/>
+</segment>
+<segment>
+<pinref part="R4" gate="G$1" pin="2"/>
+<wire x1="208.28" y1="147.32" x2="195.58" y2="147.32" width="0.1524" layer="91"/>
+<label x="195.58" y="147.32" size="1.778" layer="95"/>
+</segment>
+<segment>
+<pinref part="SJ1" gate="1" pin="1"/>
+<wire x1="109.22" y1="43.18" x2="88.9" y2="43.18" width="0.1524" layer="91"/>
+<label x="93.98" y="43.18" size="1.778" layer="95"/>
 </segment>
 </net>
 </nets>
