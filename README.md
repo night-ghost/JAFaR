@@ -38,9 +38,9 @@ on the base module the frequency is set by the user using an OSD menu.
 <img src="/docs/base_back.jpg" width="50%" height="50%" />
 </p>
 
-__MAIN MODULE BOM__
+__MAIN MODULE (V4.0) BOM__
 
-https://docs.google.com/spreadsheets/d/1-763imBV3QsQ71GKDZH-BirTz1k32szNuJZUKQrE00g/edit?usp=sharing
+https://docs.google.com/spreadsheets/d/1CrZzOQHyK_d1VfHCQKwdNuoyMji0IYryI1VuffojdGA/edit?usp=sharing
 
 __DIY Instructions__
 
@@ -59,9 +59,9 @@ The diversity module is an optional second receiver, connected to the "main" bas
 
 please notice that because of the linear regulator it's not possibile to use a 3s battery to power the diversity module at the moment.
 
-__DIVERSITY MODULE BOM__
+__DIVERSITY MODULE (V2.1) BOM__
 
-https://docs.google.com/spreadsheets/d/1xEpQe3_p0bN-8RNdvx7PaL_biuvL8IJB6aDtJCb4B00/edit?usp=sharing
+https://docs.google.com/spreadsheets/d/1OpagubuxicmGTKqOHWwWdxZxY6wCs_DZqTYRxVoD4Tc/edit?usp=sharing
 
 __DIY Instructions__
 
