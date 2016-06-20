@@ -34,7 +34,7 @@ char buf[30];
 uint8_t last_post_switch;
 char timer;
 
-uint8_t do_nothing;
+uint8_t do_nothing, flag_first_pos;
 
 uint16_t last_used_freq, last_used_band, last_used_freq_id;
 
@@ -62,15 +62,21 @@ void setup() {
 
   //splash screen
   TV.clear_screen();
-  TV.print(0, 0, "FPVR FATSHARK\nRX MODULE - V0.02\nby MikyM0use\n\n");
+  TV.print(0, 0, "FPVR FATSHARK\nRX MODULE - V0.02s\nby MikyM0use\n\n");
   TV.print(0, 50, "RSSI MIN");
   TV.println(60, 50, rssi_min, DEC); //RSSI
   TV.print(0, 60, "RSSI MAX");
   TV.println(60, 60, rssi_max, DEC); //RSSI
 
   delay(5000);
-
+  flag_first_pos = 0;
+#ifdef FORCE_FIRST_MENU_ITEM
+  flag_first_pos = readSwitch();
+  last_post_switch = 0;
+  timer = 9;
+#else
   last_post_switch = -1; //init menu position
+#endif
   do_nothing = 0;
 
   last_used_band = EEPROM.read(EEPROM_ADDR_LAST_BAND_ID); //channel name
@@ -254,9 +260,16 @@ void loop(void) {
     return;
 
   uint8_t menu_pos = readSwitch();
+
+#ifdef FORCE_FIRST_MENU_ITEM
+  if (flag_first_pos == menu_pos)
+    menu_pos = 0;
+#endif
+
   uint8_t i;
 
   if (last_post_switch != menu_pos) {
+    flag_first_pos = 0;
     timer = 9;
   }
   else timer--;
