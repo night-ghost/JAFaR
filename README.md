@@ -48,9 +48,6 @@ The PCB allow the use of a capacitor or a resistor on the video out. DON'T use b
 
 ##Diversity module
 
-<<<<<<< HEAD
-__please refer to the "testing" branch for more information on the diversity module__
-=======
 The diversity module is an optional second receiver, connected to the "main" base module, it has:
 *integrated linear 5v regulator with ENABLE feature connected to the VCC of the main module. In fact power a second module from the internal goggles voltage regulator IS VERY DANGEROUS!
 *an optinal operational buffer for RSSI signal (I noticed that lately modules seems to be more delicate)
@@ -69,7 +66,6 @@ https://docs.google.com/spreadsheets/d/1OpagubuxicmGTKqOHWwWdxZxY6wCs_DZqTYRxVoD
 __DIY Instructions__
 
 TODO
->>>>>>> testing
 
 ##Reference thread 
 
