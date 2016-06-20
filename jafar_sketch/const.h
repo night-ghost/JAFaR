@@ -22,6 +22,7 @@ This file is part of Fatshark© goggle rx module project (JAFaR).
 
 //#define DEBUG
 #define ENABLE_RSSILOG
+//#define FORCE_FIRST_MENU_ITEM
 
 #define CH1 2
 #define CH2 3

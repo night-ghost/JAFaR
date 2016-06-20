@@ -38,9 +38,9 @@ on the base module the frequency is set by the user using an OSD menu.
 <img src="/docs/base_back.jpg" width="50%" height="50%" />
 </p>
 
-__MAIN MODULE BOM__
+__MAIN MODULE (V4.0) BOM__
 
-https://docs.google.com/spreadsheets/d/1-763imBV3QsQ71GKDZH-BirTz1k32szNuJZUKQrE00g/edit?usp=sharing
+https://docs.google.com/spreadsheets/d/1CrZzOQHyK_d1VfHCQKwdNuoyMji0IYryI1VuffojdGA/edit?usp=sharing
 
 __DIY Instructions__
 
@@ -48,7 +48,28 @@ The PCB allow the use of a capacitor or a resistor on the video out. DON'T use b
 
 ##Diversity module
 
+<<<<<<< HEAD
 __please refer to the "testing" branch for more information on the diversity module__
+=======
+The diversity module is an optional second receiver, connected to the "main" base module, it has:
+*integrated linear 5v regulator with ENABLE feature connected to the VCC of the main module. In fact power a second module from the internal goggles voltage regulator IS VERY DANGEROUS!
+*an optinal operational buffer for RSSI signal (I noticed that lately modules seems to be more delicate)
+
+<p align="center">
+<img src="/docs/diversity_front.jpg" width="50%" height="50%" />
+<img src="/docs/diversity_back.jpg" width="50%" height="50%" />
+<p>
+
+please notice that because of the linear regulator it's not possibile to use a 3s battery to power the diversity module at the moment.
+
+__DIVERSITY MODULE (V2.1) BOM__
+
+https://docs.google.com/spreadsheets/d/1OpagubuxicmGTKqOHWwWdxZxY6wCs_DZqTYRxVoD4Tc/edit?usp=sharing
+
+__DIY Instructions__
+
+TODO
+>>>>>>> testing
 
 ##Reference thread 
 
