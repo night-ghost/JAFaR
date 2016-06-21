@@ -43,8 +43,27 @@ __MAIN MODULE (V4.0) BOM__
 https://docs.google.com/spreadsheets/d/1CrZzOQHyK_d1VfHCQKwdNuoyMji0IYryI1VuffojdGA/edit?usp=sharing
 
 __DIY Instructions__
+stages to success:
+1) follow the instructions on the page https://www.arduino.cc/en/Tutorial/ArduinoISP to program the module (select "arduino micro" as target board)
+2) after the burn of the bootloader, use the FTDI connections in the upper right corner of the board to flash the code present in the Github page of the project
+3) the very first time you power on the module, it need to calibrate itself. So please turn on the module with a Vtx a couple of meter away (the video frequency doen't matter). This process can take a while (about 30-50 seconds).
 
-The PCB allow the use of a capacitor or a resistor on the video out. DON'T use both! I have the best performance using just the resistor, but you can experiment what happens changing the resistor value or the capacitor.
+4) when you power on the module, BOTH the leds (upper left corner of the pcb) must be on, and you must see a relatively stable splash screen for about 5 seconds
+5) you can now use the "selection" buttons on the goggles to scroll up/down the menu to select the band
+6) after the timout of the countdown (upper left corner of the screen) you entered the frequency selection (of the selected band)
+7) scroll up/down to select the frequency and wait the timeout
+
+8) at this moment only one led on the module has to be ON, it means that the RX video output is routed to the video_input of the goggles. If you have a Vtx near, you should see the video coming from it. 
+
+9) if you press the "selection" buttons of the goggles now, you change the frequency by the 8 frequencies of the previously selected band.
+
+
+note ONLY FOR 3.2 version of the PCB: the PCB allow the use of a capacitor OR a resistor on the video out. DON'T use both!
+
+__Troubleshooting__
+after the initial calibration, the module must turn on in couple of seconds and you must see the splash screen for some seconds before the "band selection" screen.
+In the "band selection" screen you can see the 5 bands with the percentage of the maximum RSSI detected on that band. At least one of the band must be at 98-100%. If you "enter" one band, every channel must shows a different percentage of RSSI, otherwise the SPI-mod of the module couls be failed.
+
 
 ##Diversity module
 
