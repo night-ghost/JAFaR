@@ -45,8 +45,11 @@ https://docs.google.com/spreadsheets/d/1CrZzOQHyK_d1VfHCQKwdNuoyMji0IYryI1Vuffoj
 __DIY Instructions__
 
 stages to success:
+
 *1) follow the instructions on the page https://www.arduino.cc/en/Tutorial/ArduinoISP to program the module (select "arduino micro" as target board)
+
 *2) after the burn of the bootloader, use the FTDI connections in the upper right corner of the board to flash the code present in the Github page of the project
+
 *3) the very first time you power on the module, it need to calibrate itself. So please turn on the module with a Vtx a couple of meter away (the video frequency doen't matter). This process can take a while (about 30-50 seconds).
 
 *4) when you power on the module, BOTH the leds (upper left corner of the pcb) must be on, and you must see a relatively stable splash screen for about 5 seconds
