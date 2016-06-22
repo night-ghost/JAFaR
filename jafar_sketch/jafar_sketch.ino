@@ -68,7 +68,7 @@ void setup() {
   TV.print(0, 60, "RSSI MAX");
   TV.println(60, 60, rssi_max, DEC); //RSSI
 
-  delay(5000);
+  TV.delay(3000);
   flag_first_pos = 0;
 #ifdef FORCE_FIRST_MENU_ITEM
   flag_first_pos = readSwitch();
@@ -89,19 +89,27 @@ inline uint8_t readSwitch() {
 }
 
 void autoscan() { //TODO BETA VERSION! diversity not supported
-  RX5808 rx5808B(rssiB, SPI_CSB);
-  rx5808B.init();
+  // RX5808 rx5808B(rssiB, SPI_CSB);
+  // rx5808B.init();
 
   rx5808.scan(1, BIN_H);
   uint32_t curr_freq = pgm_read_word_near(channelFreqTable + rx5808.getMaxPos());
-  use_freq(curr_freq, rx5808, rx5808B);
+  use_freq(curr_freq, rx5808);
 
   SELECT_A;
 }
 
-void use_freq(uint32_t freq, RX5808 rx5808, RX5808 rx5808B) {
+#ifdef USE_DIVERSITY
+void use_freq_diversity(uint32_t freq, RX5808 rx5808, RX5808 rx5808B) {
   rx5808.setFreq(freq);
   rx5808B.setFreq(freq);
+
+  do_nothing = 1;
+}
+#endif
+
+void use_freq(uint32_t freq, RX5808 rx5808) {
+  rx5808.setFreq(freq);
 
   do_nothing = 1;
 }
@@ -111,14 +119,21 @@ void use_freq(uint32_t freq, RX5808 rx5808, RX5808 rx5808B) {
 
 void set_and_wait(uint8_t band, uint8_t menu_pos) {
   unsigned rssi_b, rssi_a;
+  u8 current_rx;
 
+#ifdef USE_DIVERISTY
   //init of the second module
   RX5808 rx5808B(rssiB, SPI_CSB);
   rx5808B.init();
-  use_freq(pgm_read_word_near(channelFreqTable + (8 * band) + menu_pos), rx5808, rx5808B); //set the selected freq
+  use_freq_diversity(pgm_read_word_near(channelFreqTable + (8 * band) + menu_pos), rx5808, rx5808B); //set the selected freq
   SELECT_B;
 
-  u8 current_rx = RX_B;
+  current_rx = RX_B;
+#else
+  use_freq(pgm_read_word_near(channelFreqTable + (8 * band) + menu_pos), rx5808); //set the selected freq
+  SELECT_A;
+  current_rx = RX_A;
+#endif
 
   //clear memory for log
 #ifdef ENABLE_RSSILOG
@@ -137,7 +152,9 @@ void set_and_wait(uint8_t band, uint8_t menu_pos) {
   //MAIN LOOP - change channel and log
   while (1) {
     rssi_a = rx5808.getCurrentRSSI();
+#ifdef USE_DIVERSITY
     rssi_b = rx5808B.getCurrentRSSI();
+#endif
 
 #ifdef ENABLE_RSSILOG
     //every loop cycle requires ~100ms
@@ -171,9 +188,10 @@ void set_and_wait(uint8_t band, uint8_t menu_pos) {
       Serial.print("\twe change at: ");
       Serial.println(rssi_b + RX_HYST, DEC);
     }
-    delay(500);
+    TV.delay(500);
 #endif
 
+#ifdef USE_DIVERISTY
     if (current_rx == RX_B && rssi_a > rssi_b + RX_HYST) {
       SELECT_A;
       current_rx = RX_A;
@@ -183,11 +201,16 @@ void set_and_wait(uint8_t band, uint8_t menu_pos) {
       SELECT_B;
       current_rx = RX_B;
     }
+#endif
 
     menu_pos = readSwitch();
 
     if (last_post_switch != menu_pos) { //something changed by user
-      use_freq(pgm_read_word_near(channelFreqTable + (8 * band) + menu_pos), rx5808, rx5808B); //set the selected freq
+#ifdef USE_DIVERSITY
+      use_freq_diversity(pgm_read_word_near(channelFreqTable + (8 * band) + menu_pos), rx5808, rx5808B); //set the selected freq
+#else
+      use_freq(pgm_read_word_near(channelFreqTable + (8 * band) + menu_pos), rx5808); //set the selected freq
+#endif
       EEPROM.write(EEPROM_ADDR_LAST_FREQ_ID, menu_pos);
     }
     last_post_switch = menu_pos;
@@ -224,7 +247,7 @@ void submenu(uint8_t pos) {
     }
 
     TV.println(92, 3, timer, DEC);
-    delay(2000);
+    TV.delay(1000);
   }
 
   TV.clear_screen();
@@ -250,7 +273,7 @@ void scanner_mode() {
     }
 
     TV.println(92, 3, timer, DEC);
-    delay(500);
+    TV.delay(500);
   }
   timer = 9;
 }
@@ -322,5 +345,5 @@ void loop(void) {
 
   TV.draw_rect(9, 2 + menu_pos * MENU_Y_SIZE, 90, 7,  WHITE, INVERT); //current selection
 
-  delay(2000);
+  TV.delay(1000);
 }
