@@ -65,8 +65,16 @@ note ONLY FOR 3.2 version of the PCB: the PCB allow the use of a capacitor OR a 
 
 __Troubleshooting__
 
-after the initial calibration, the module must turn on in couple of seconds and you must see the splash screen for some seconds before the "band selection" screen.
+After the initial calibration, the module must turn on in couple of seconds and you must see the splash screen for some seconds before the "band selection" screen.
 In the "band selection" screen you can see the 5 bands with the percentage of the maximum RSSI detected on that band. At least one of the band must be at 98-100%. If you "enter" one band, every channel must shows a different percentage of RSSI, otherwise the SPI-mod of the module couls be failed.
+
+If you have an external monitor, you can bypass the digital switch by power on the module with external 5v and connecting the "video in" of the monitor on the test point marked in yellow the picture:
+
+<img src="/docs/video_test_points.jpg" width="50%" height="50%" />
+
+and you should see the splash screen and the menu.
+
+if you connect the "video in" of the monitor to the test point marked in green, you should see the initial scanning (used to determine the % of the RSSI on each channel), this means a sequence of different "fogs" and (at least) one "good" image (for a fraction of second), if you have a Vtx + cam transmitting. 
 
 
 ##Diversity module
