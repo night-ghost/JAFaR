@@ -122,11 +122,11 @@ void set_and_wait(uint8_t band, uint8_t menu_pos) {
   u8 current_rx;
 
 
-  
+
 #ifdef USE_DIVERSITY
   //init of the second module
   RX5808 rx5808B(rssiB, SPI_CSB);
-  
+
   rx5808B.init();
   use_freq_diversity(pgm_read_word_near(channelFreqTable + (8 * band) + menu_pos), rx5808, rx5808B); //set the selected freq
   SELECT_B;
@@ -152,8 +152,7 @@ void set_and_wait(uint8_t band, uint8_t menu_pos) {
   EEPROM.write(EEPROM_ADDR_LAST_FREQ_ID, menu_pos); //freq id
   EEPROM.write(EEPROM_ADDR_LAST_BAND_ID, band); //channel name
 
-  //force OSD disable
-  TV.clear_screen();
+
 
   //MAIN LOOP - change channel and log
   while (1) {
@@ -197,7 +196,7 @@ void set_and_wait(uint8_t band, uint8_t menu_pos) {
     TV.delay(500);
 #endif
 
-#ifdef USE_DIVERISTY
+#ifdef USE_DIVERSITY
     if (current_rx == RX_B && rssi_a > rssi_b + RX_HYST) {
       SELECT_A;
       current_rx = RX_A;
@@ -259,6 +258,10 @@ void submenu(uint8_t pos) {
   TV.clear_screen();
   TV.printPGM(0, 50, PSTR("SETTING\nFREQUENCY..."));
   set_and_wait(band, menu_pos);
+
+  //force OSD disable
+  TV.delay(1000);
+  TV.clear_screen();
 }
 
 void scanner_mode() {
