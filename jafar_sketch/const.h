@@ -25,8 +25,8 @@ This file is part of Fatshark© goggle rx module project (JAFaR).
 //#define FORCE_FIRST_MENU_ITEM
 
 //ONLY ONE OF THE FOLLOWING:
-#define USE_DIVERSITY
-//#define USE_OLED
+//#define USE_DIVERSITY
+#define USE_OLED
 
 #define CH1 2
 #define CH2 3
