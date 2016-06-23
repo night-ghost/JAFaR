@@ -121,9 +121,12 @@ void set_and_wait(uint8_t band, uint8_t menu_pos) {
   unsigned rssi_b, rssi_a;
   u8 current_rx;
 
-#ifdef USE_DIVERISTY
+
+  
+#ifdef USE_DIVERSITY
   //init of the second module
   RX5808 rx5808B(rssiB, SPI_CSB);
+  
   rx5808B.init();
   use_freq_diversity(pgm_read_word_near(channelFreqTable + (8 * band) + menu_pos), rx5808, rx5808B); //set the selected freq
   SELECT_B;
@@ -148,6 +151,9 @@ void set_and_wait(uint8_t band, uint8_t menu_pos) {
   //save band and freq as "last used"
   EEPROM.write(EEPROM_ADDR_LAST_FREQ_ID, menu_pos); //freq id
   EEPROM.write(EEPROM_ADDR_LAST_BAND_ID, band); //channel name
+
+  //force OSD disable
+  TV.clear_screen();
 
   //MAIN LOOP - change channel and log
   while (1) {
