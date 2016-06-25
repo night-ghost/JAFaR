@@ -63,8 +63,43 @@ void use_freq(uint32_t freq, RX5808 rx5808) {
 #include "U8glib.h"
 U8GLIB_SSD1306_128X64 u8g(8, A1, A4, 11 , 13);
 
+char j_buf[80];
 
-void oled_init() { // flip screen, if required
+
+
+
+
+void oled_splah_draw(void) {
+  //u8g.setFont(u8g_font_unifont);
+  //u8g.setFont(u8g_font_osb21);
+  u8g.setFont(u8g_font_8x13);
+  u8g.drawStr( 0, 10, "JAFaR Module");
+  u8g.drawStr( 0, 25, "by MiyM0use");
+
+
+  //
+  u8g.setFont(u8g_font_6x10);
+  sprintf (j_buf, "RSSI MIN %d", rssi_min); //Rssi min
+  u8g.drawStr(0, 45, j_buf);
+
+  sprintf (j_buf, "RSSI MAX %d", rssi_max); //Rssi max
+  u8g.drawStr(0, 60, j_buf);
+}
+
+void oled_splash() {
+  // picture loop
+  u8g.firstPage();
+  do {
+    oled_splah_draw();
+  } while ( u8g.nextPage() );
+
+  // rebuild the picture after some delay
+  delay(2000);
+
+}
+
+
+void oled_init(void) { // flip screen, if required
   // u8g.setRot180();
 
   // set SPI backup if required
@@ -84,27 +119,8 @@ void oled_init() { // flip screen, if required
     u8g.setHiColorByRGB(255, 255, 255);
   }
 
+  oled_splash();
 }
-
-void draw(void) {
-  // graphic commands to redraw the complete screen should be placed here
-  u8g.setFont(u8g_font_unifont);
-  //u8g.setFont(u8g_font_osb21);
-  u8g.drawStr( 0, 22, "Hello World!");
-}
-
-void oled_mainmenu() {
-  // picture loop
-  u8g.firstPage();
-  do {
-    draw();
-  } while ( u8g.nextPage() );
-
-  // rebuild the picture after some delay
-  delay(50);
-
-}
-
 
 #else
 
@@ -462,7 +478,7 @@ void loop(void) {
 
 
 #ifdef USE_OLED
-  oled_mainmenu();
+  //  oled_mainmenu();
 #else
   osd_mainmenu(menu_pos) ;
 #endif
