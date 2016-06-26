@@ -28,6 +28,8 @@ This file is part of Fatshark© goggle rx module project (JAFaR).
 //#define USE_DIVERSITY
 #define USE_OLED
 
+
+#define TIMER_INIT_VALUE 9
 #define CH1 2
 #define CH2 3
 #define CH3 4

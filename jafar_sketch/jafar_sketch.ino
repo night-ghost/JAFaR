@@ -32,9 +32,9 @@ This file is part of Fatshark© goggle rx module project (JAFaR).
 RX5808 rx5808(rssiA, SPI_CSA);
 char buf[30];
 uint8_t last_post_switch;
-char timer;
+int8_t timer;
 
-uint8_t do_nothing, flag_first_pos;
+uint8_t do_nothing, flag_first_pos,  in_mainmenu, menu_band;
 
 uint16_t last_used_freq, last_used_band, last_used_freq_id;
 
@@ -69,31 +69,21 @@ char j_buf[80];
 
 
 
-void oled_splah_draw(void) {
-  //u8g.setFont(u8g_font_unifont);
-  //u8g.setFont(u8g_font_osb21);
-  u8g.setFont(u8g_font_8x13);
-  u8g.drawStr( 0, 10, "JAFaR Module");
-  u8g.drawStr( 0, 25, "by MiyM0use");
-
-
-  //
-  u8g.setFont(u8g_font_6x10);
-  sprintf (j_buf, "RSSI MIN %d", rssi_min); //Rssi min
-  u8g.drawStr(0, 45, j_buf);
-
-  sprintf (j_buf, "RSSI MAX %d", rssi_max); //Rssi max
-  u8g.drawStr(0, 60, j_buf);
-}
-
 void oled_splash() {
-  // picture loop
+
+  u8g.setFont(u8g_font_8x13);
   u8g.firstPage();
   do {
-    oled_splah_draw();
-  } while ( u8g.nextPage() );
+    u8g.drawStr( 0, 20, "JAFaR Project");
+    u8g.drawStr( 0, 35, "by MikyM0use");
 
-  // rebuild the picture after some delay
+    u8g.setFont(u8g_font_6x10);
+    sprintf (j_buf, "RSSI MIN %d", rssi_min); //Rssi min
+    u8g.drawStr(0, 50, j_buf);
+
+    sprintf (j_buf, "RSSI MAX %d", rssi_max); //Rssi max
+    u8g.drawStr(0, 60, j_buf);
+  } while ( u8g.nextPage() );
   delay(2000);
 
 }
@@ -122,7 +112,107 @@ void oled_init(void) { // flip screen, if required
   oled_splash();
 }
 
-#else
+#define MENU_ITEMS 8
+uint8_t oled_submenu(uint8_t menu_pos, uint8_t band) {
+  int i;
+
+  u8g.setFont(u8g_font_6x10);
+
+  u8g.firstPage();
+  do {
+    for (i = 0; i < MENU_ITEMS; i++) {
+      u8g.setDefaultForegroundColor();
+      if (i == menu_pos) {
+
+        u8g.drawBox(0, 1 + menu_pos * 8, 110, 8);
+        u8g.setDefaultBackgroundColor();
+      }
+
+      sprintf (j_buf, "%d %d", pgm_read_word_near(channelFreqTable + (8 * band) + i), rx5808.getVal(band, i, 100));
+      u8g.drawStr( 0, 8 + i * 8, j_buf);
+    }
+
+    u8g.setPrintPos(110, 10);
+    u8g.print(timer);
+
+  } while ( u8g.nextPage() );
+
+
+  
+
+}
+
+void oled_mainmenu(uint8_t menu_pos) {
+  int i;
+
+
+  u8g.setFont(u8g_font_6x10);
+
+  sprintf (j_buf, "LAST USED: %x:%d  %d", pgm_read_byte_near(channelNames + (8 * last_used_band) + last_used_freq_id), last_used_freq, timer); //last used freq
+  char *menu_strings[MENU_ITEMS] {j_buf, "BAND A", "BAND B", "BAND E", "BAND FATSHARK", "RACEBAND", "SCANNER", "AUTOSCAN"};
+
+  u8g.firstPage();
+  do {
+
+    for (i = 0; i < MENU_ITEMS; i++) {
+      u8g.setDefaultForegroundColor();
+      if (i == menu_pos) {
+
+        u8g.drawBox(0, 1 + menu_pos * 8, 110, 7);
+        u8g.setDefaultBackgroundColor();
+      }
+      u8g.drawStr( 0, 8 + i * 8, menu_strings[i]);
+    }
+
+    //Selection
+    /*
+
+
+    u8g.drawStr( 0, 8, j_buf);
+    u8g.drawStr( 0, 16, "BAND A");
+    u8g.drawStr( 0, 24, "BAND B");
+
+    u8g.drawStr( 0, 8 * 4, "BAND E");
+    u8g.drawStr( 0, 8 * 5, "BAND FATSHARK");
+    u8g.drawStr( 0, 8 * 6, "RACEBAND");
+    u8g.drawStr( 0, 8 * 7, "SCANNER");
+    u8g.drawStr( 0, 64, "AUTOSCAN");
+
+    */
+
+
+  } while ( u8g.nextPage() );
+
+  /*
+  TV.draw_rect(1, 1, 100, 94,  WHITE);
+
+  //header and countdown
+  TV.println(92, 3, timer, DEC);
+
+  //last used band,freq
+  TV.printPGM(10, 3 , PSTR("LAST:"));
+  TV.println(45, 3 , pgm_read_byte_near(channelNames + (8 * last_used_band) + last_used_freq_id), HEX);
+  TV.println(60, 3 , last_used_freq, DEC);
+
+  //entire menu
+  TV.printPGM(10, 3 + 1 * MENU_Y_SIZE, PSTR("BAND A"));
+  TV.printPGM(10, 3 + 2 * MENU_Y_SIZE, PSTR("BAND B"));
+  TV.printPGM(10, 3 + 3 * MENU_Y_SIZE, PSTR("BAND E"));
+  TV.printPGM(10, 3 + 4 * MENU_Y_SIZE, PSTR("FATSHARK"));
+  TV.printPGM(10, 3 + 5 * MENU_Y_SIZE, PSTR("RACEBAND"));
+  TV.printPGM(10, 3 + 6 * MENU_Y_SIZE, PSTR("SCANNER"));
+  TV.printPGM(10, 3 + 7 * MENU_Y_SIZE, PSTR("AUTOSCAN"));
+
+  for (i = 0; i < 5; i++) {
+   TV.println(65, 3 + (1 + i) * MENU_Y_SIZE, rx5808.getMaxValBand(i, 100), DEC);
+   TV.printPGM(85, 3 + (1 + i) * MENU_Y_SIZE, PSTR("%"));
+  }
+
+  TV.draw_rect(9, 2 + menu_pos * MENU_Y_SIZE, 90, 7,  WHITE, INVERT); //current selection
+  */
+}
+
+#else //USE OSD
 
 #include <TVout.h>
 #include <fontALL.h>
@@ -254,9 +344,7 @@ uint8_t osd_submenu(u8 band) {
 
 
 
-
-
-
+//////********* SETUP ************////////////////////
 void setup() {
 #ifdef DEBUG
   Serial.begin(9600);
@@ -290,6 +378,8 @@ void setup() {
   last_post_switch = -1; //init menu position
 #endif
   do_nothing = 0;
+
+  in_mainmenu = 1;
 
   last_used_band = EEPROM.read(EEPROM_ADDR_LAST_BAND_ID); //channel name
   last_used_freq_id = EEPROM.read(EEPROM_ADDR_LAST_FREQ_ID);
@@ -409,27 +499,31 @@ void set_and_wait(uint8_t band, uint8_t menu_pos) {
       use_freq(pgm_read_word_near(channelFreqTable + (8 * band) + menu_pos), rx5808); //set the selected freq
 #endif
       EEPROM.write(EEPROM_ADDR_LAST_FREQ_ID, menu_pos);
+
+      
     }
     last_post_switch = menu_pos;
 
   } //end of loop
 
 }
-
+/*
 void submenu(uint8_t pos) {
 
   uint8_t i;
-  last_post_switch = -1; //force start
+  // last_post_switch = -1; //force start
   uint8_t band = pos - 1;
-  uint8_t menu_pos;
+  uint8_t menu_pos = readSwitch();
 
-#ifndef USE_OLED
-  menu_pos = osd_submenu(band);
+#ifdef USE_OLED
+  oled_submenu(menu_pos, band);
+#else
+  menu_pos = osd_dsubmenu(menu_pos, band);
 #endif
 
-  set_and_wait(band, menu_pos);
-}
 
+}
+*/
 void scanner_mode() {
 
 #ifndef USE_OLED
@@ -453,7 +547,7 @@ void loop(void) {
 
   if (last_post_switch != menu_pos) {
     flag_first_pos = 0;
-    timer = 9;
+    timer = TIMER_INIT_VALUE;
   }
   else timer--;
 
@@ -471,17 +565,36 @@ void loop(void) {
         autoscan();
         break;
       default:
-        submenu(menu_pos);
+
+        if (in_mainmenu) {
+          in_mainmenu = 0;
+          menu_band = menu_pos - 1;
+          timer = TIMER_INIT_VALUE;
+        } else { //after selection of band AND freq by the user
+          set_and_wait(menu_band, menu_pos);
+        }
+
+
         break;
     }
   }
 
 
+  if (in_mainmenu) { //on main menu
 #ifdef USE_OLED
-  //  oled_mainmenu();
+    oled_mainmenu(menu_pos);
+    delay(1000);
 #else
-  osd_mainmenu(menu_pos) ;
+    osd_mainmenu(menu_pos) ;
 #endif
+  } else { //on submenu
+#ifdef USE_OLED
+    oled_submenu(menu_pos,  menu_band);
+    delay(1000);
+#else
+    osd_submenu(menu_pos,  menu_band);
+#endif
+  }
 
 }
 
