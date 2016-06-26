@@ -53,21 +53,14 @@ void use_freq_diversity(uint32_t freq, RX5808 rx5808, RX5808 rx5808B) {
 
 void use_freq(uint32_t freq, RX5808 rx5808) {
   rx5808.setFreq(freq);
-
   do_nothing = 1;
 }
-
-
 
 #ifdef USE_OLED
 #include "U8glib.h"
 U8GLIB_SSD1306_128X64 u8g(8, A1, A4, 11 , 13);
 
 char j_buf[80];
-
-
-
-
 
 void oled_splash() {
 
@@ -138,7 +131,7 @@ uint8_t oled_submenu(uint8_t menu_pos, uint8_t band) {
   } while ( u8g.nextPage() );
 
 
-  
+
 
 }
 
@@ -408,6 +401,7 @@ void set_and_wait(uint8_t band, uint8_t menu_pos) {
   unsigned rssi_b, rssi_a;
   u8 current_rx;
 
+
 #ifdef USE_DIVERISTY
   //init of the second module
   RX5808 rx5808B(rssiB, SPI_CSB);
@@ -500,7 +494,7 @@ void set_and_wait(uint8_t band, uint8_t menu_pos) {
 #endif
       EEPROM.write(EEPROM_ADDR_LAST_FREQ_ID, menu_pos);
 
-      
+
     }
     last_post_switch = menu_pos;
 
@@ -520,8 +514,6 @@ void submenu(uint8_t pos) {
 #else
   menu_pos = osd_dsubmenu(menu_pos, band);
 #endif
-
-
 }
 */
 void scanner_mode() {
@@ -572,6 +564,7 @@ void loop(void) {
           timer = TIMER_INIT_VALUE;
         } else { //after selection of band AND freq by the user
           set_and_wait(menu_band, menu_pos);
+          timer = 0;
         }
 
 
@@ -597,8 +590,3 @@ void loop(void) {
   }
 
 }
-
-
-
-
-
