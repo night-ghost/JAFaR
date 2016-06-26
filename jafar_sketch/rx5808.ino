@@ -141,7 +141,7 @@ void RX5808::init() {
     SPI.transfer(0x00);
     digitalWrite(_csPin, HIGH);
   */
-  if (abs(rssi_max-rssi_min > 300) || abs(rssi_max-rssi_min < 50))
+  if (abs(rssi_max - rssi_min > 300) || abs(rssi_max - rssi_min < 50))
     calibration();
 
   scan(1, BIN_H);

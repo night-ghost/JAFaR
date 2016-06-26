@@ -22,188 +22,20 @@ This file is part of Fatshark© goggle rx module project (JAFaR).
 #include <EEPROM.h>
 
 #include "rx5808.h"
-
-
 #include "const.h"
 
-
-
-
 RX5808 rx5808(rssiA, SPI_CSA);
-char buf[30];
-uint8_t last_post_switch;
+
+uint8_t last_post_switch, do_nothing, flag_first_pos,  in_mainmenu, menu_band;
 int8_t timer;
-
-uint8_t do_nothing, flag_first_pos,  in_mainmenu, menu_band;
-
 uint16_t last_used_freq, last_used_band, last_used_freq_id;
 
-inline uint8_t readSwitch() {
-  return 0x7 - ((digitalRead(CH3) << 2) | (digitalRead(CH2) << 1) | digitalRead(CH1));
-}
-
-#ifdef USE_DIVERSITY
-void use_freq_diversity(uint32_t freq, RX5808 rx5808, RX5808 rx5808B) {
-  rx5808.setFreq(freq);
-  rx5808B.setFreq(freq);
-
-  do_nothing = 1;
-}
-#endif
-
-void use_freq(uint32_t freq, RX5808 rx5808) {
-  rx5808.setFreq(freq);
-  do_nothing = 1;
-}
-
 #ifdef USE_OLED
+
 #include "U8glib.h"
-U8GLIB_SSD1306_128X64 u8g(8, A1, A4, 11 , 13);
 
+U8GLIB_SSD1306_128X64 u8g(8, A1, A4, 11 , 13); //CLK, MOSI, CS, DC, RESET
 char j_buf[80];
-
-void oled_splash() {
-
-  u8g.setFont(u8g_font_8x13);
-  u8g.firstPage();
-  do {
-    u8g.drawStr( 0, 20, "JAFaR Project");
-    u8g.drawStr( 0, 35, "by MikyM0use");
-
-    u8g.setFont(u8g_font_6x10);
-    sprintf (j_buf, "RSSI MIN %d", rssi_min); //Rssi min
-    u8g.drawStr(0, 50, j_buf);
-
-    sprintf (j_buf, "RSSI MAX %d", rssi_max); //Rssi max
-    u8g.drawStr(0, 60, j_buf);
-  } while ( u8g.nextPage() );
-  delay(2000);
-
-}
-
-
-void oled_init(void) { // flip screen, if required
-  // u8g.setRot180();
-
-  // set SPI backup if required
-  //u8g.setHardwareBackup(u8g_backup_avr_spi);
-
-  // assign default color value
-  if ( u8g.getMode() == U8G_MODE_R3G3B2 ) {
-    u8g.setColorIndex(255);     // white
-  }
-  else if ( u8g.getMode() == U8G_MODE_GRAY2BIT ) {
-    u8g.setColorIndex(3);         // max intensity
-  }
-  else if ( u8g.getMode() == U8G_MODE_BW ) {
-    u8g.setColorIndex(1);         // pixel on
-  }
-  else if ( u8g.getMode() == U8G_MODE_HICOLOR ) {
-    u8g.setHiColorByRGB(255, 255, 255);
-  }
-
-  oled_splash();
-}
-
-#define MENU_ITEMS 8
-uint8_t oled_submenu(uint8_t menu_pos, uint8_t band) {
-  int i;
-
-  u8g.setFont(u8g_font_6x10);
-
-  u8g.firstPage();
-  do {
-    for (i = 0; i < MENU_ITEMS; i++) {
-      u8g.setDefaultForegroundColor();
-      if (i == menu_pos) {
-
-        u8g.drawBox(0, 1 + menu_pos * 8, 110, 8);
-        u8g.setDefaultBackgroundColor();
-      }
-
-      sprintf (j_buf, "%d %d", pgm_read_word_near(channelFreqTable + (8 * band) + i), rx5808.getVal(band, i, 100));
-      u8g.drawStr( 0, 8 + i * 8, j_buf);
-    }
-
-    u8g.setPrintPos(110, 10);
-    u8g.print(timer);
-
-  } while ( u8g.nextPage() );
-
-
-
-
-}
-
-void oled_mainmenu(uint8_t menu_pos) {
-  int i;
-
-
-  u8g.setFont(u8g_font_6x10);
-
-  sprintf (j_buf, "LAST USED: %x:%d  %d", pgm_read_byte_near(channelNames + (8 * last_used_band) + last_used_freq_id), last_used_freq, timer); //last used freq
-  char *menu_strings[MENU_ITEMS] {j_buf, "BAND A", "BAND B", "BAND E", "BAND FATSHARK", "RACEBAND", "SCANNER", "AUTOSCAN"};
-
-  u8g.firstPage();
-  do {
-
-    for (i = 0; i < MENU_ITEMS; i++) {
-      u8g.setDefaultForegroundColor();
-      if (i == menu_pos) {
-
-        u8g.drawBox(0, 1 + menu_pos * 8, 110, 7);
-        u8g.setDefaultBackgroundColor();
-      }
-      u8g.drawStr( 0, 8 + i * 8, menu_strings[i]);
-    }
-
-    //Selection
-    /*
-
-
-    u8g.drawStr( 0, 8, j_buf);
-    u8g.drawStr( 0, 16, "BAND A");
-    u8g.drawStr( 0, 24, "BAND B");
-
-    u8g.drawStr( 0, 8 * 4, "BAND E");
-    u8g.drawStr( 0, 8 * 5, "BAND FATSHARK");
-    u8g.drawStr( 0, 8 * 6, "RACEBAND");
-    u8g.drawStr( 0, 8 * 7, "SCANNER");
-    u8g.drawStr( 0, 64, "AUTOSCAN");
-
-    */
-
-
-  } while ( u8g.nextPage() );
-
-  /*
-  TV.draw_rect(1, 1, 100, 94,  WHITE);
-
-  //header and countdown
-  TV.println(92, 3, timer, DEC);
-
-  //last used band,freq
-  TV.printPGM(10, 3 , PSTR("LAST:"));
-  TV.println(45, 3 , pgm_read_byte_near(channelNames + (8 * last_used_band) + last_used_freq_id), HEX);
-  TV.println(60, 3 , last_used_freq, DEC);
-
-  //entire menu
-  TV.printPGM(10, 3 + 1 * MENU_Y_SIZE, PSTR("BAND A"));
-  TV.printPGM(10, 3 + 2 * MENU_Y_SIZE, PSTR("BAND B"));
-  TV.printPGM(10, 3 + 3 * MENU_Y_SIZE, PSTR("BAND E"));
-  TV.printPGM(10, 3 + 4 * MENU_Y_SIZE, PSTR("FATSHARK"));
-  TV.printPGM(10, 3 + 5 * MENU_Y_SIZE, PSTR("RACEBAND"));
-  TV.printPGM(10, 3 + 6 * MENU_Y_SIZE, PSTR("SCANNER"));
-  TV.printPGM(10, 3 + 7 * MENU_Y_SIZE, PSTR("AUTOSCAN"));
-
-  for (i = 0; i < 5; i++) {
-   TV.println(65, 3 + (1 + i) * MENU_Y_SIZE, rx5808.getMaxValBand(i, 100), DEC);
-   TV.printPGM(85, 3 + (1 + i) * MENU_Y_SIZE, PSTR("%"));
-  }
-
-  TV.draw_rect(9, 2 + menu_pos * MENU_Y_SIZE, 90, 7,  WHITE, INVERT); //current selection
-  */
-}
 
 #else //USE OSD
 
@@ -212,130 +44,7 @@ void oled_mainmenu(uint8_t menu_pos) {
 
 TVout TV;
 
-
-
-
-
-
-
-void osd_init(void ) {
-
-  //tv init
-  TV.begin(PAL, D_COL, D_ROW);
-  TV.select_font(font6x8);
-
-  //splash screen
-  TV.clear_screen();
-  TV.print(0, 0, "FPVR FATSHARK\nRX MODULE - V0.02s\nby MikyM0use\n\n");
-  TV.print(0, 50, "RSSI MIN");
-  TV.println(60, 50, rssi_min, DEC); //RSSI
-  TV.print(0, 60, "RSSI MAX");
-  TV.println(60, 60, rssi_max, DEC); //RSSI
-
-  TV.delay(3000);
-}
-
-
-void osd_mainmenu(uint8_t menu_pos) {
-  int i;
-  TV.clear_screen();
-  TV.select_font(font6x8);
-  TV.draw_rect(1, 1, 100, 94,  WHITE);
-
-  //header and countdown
-  TV.println(92, 3, timer, DEC);
-
-  //last used band,freq
-  TV.printPGM(10, 3 , PSTR("LAST:"));
-  TV.println(45, 3 , pgm_read_byte_near(channelNames + (8 * last_used_band) + last_used_freq_id), HEX);
-  TV.println(60, 3 , last_used_freq, DEC);
-
-  //entire menu
-  TV.printPGM(10, 3 + 1 * MENU_Y_SIZE, PSTR("BAND A"));
-  TV.printPGM(10, 3 + 2 * MENU_Y_SIZE, PSTR("BAND B"));
-  TV.printPGM(10, 3 + 3 * MENU_Y_SIZE, PSTR("BAND E"));
-  TV.printPGM(10, 3 + 4 * MENU_Y_SIZE, PSTR("FATSHARK"));
-  TV.printPGM(10, 3 + 5 * MENU_Y_SIZE, PSTR("RACEBAND"));
-  TV.printPGM(10, 3 + 6 * MENU_Y_SIZE, PSTR("SCANNER"));
-  TV.printPGM(10, 3 + 7 * MENU_Y_SIZE, PSTR("AUTOSCAN"));
-
-  for (i = 0; i < 5; i++) {
-    TV.println(65, 3 + (1 + i) * MENU_Y_SIZE, rx5808.getMaxValBand(i, 100), DEC);
-    TV.printPGM(85, 3 + (1 + i) * MENU_Y_SIZE, PSTR("%"));
-  }
-
-  TV.draw_rect(9, 2 + menu_pos * MENU_Y_SIZE, 90, 7,  WHITE, INVERT); //current selection
-
-  TV.delay(1000);
-}
-
-void osd_scanner() {
-  uint8_t menu_pos;
-  timer = 9;
-  while (timer-- > 0) {
-    rx5808.scan(1, BIN_H);
-    TV.clear_screen();
-    TV.draw_rect(1, 1, 100, 94,  WHITE);
-    TV.select_font(font4x6);
-    TV.printPGM(5, 87, PSTR("5645"));
-    TV.printPGM(45, 87, PSTR("5800"));
-    TV.printPGM(85, 87, PSTR("5945"));
-
-    TV.select_font(font6x8);
-    for (int i = CHANNEL_MIN; i < CHANNEL_MAX; i++) {
-      uint8_t channelIndex = pgm_read_byte_near(channelList + i); //retrive the value based on the freq order
-      TV.draw_rect(10 + 2 * i, 10 + BIN_H - rx5808.getRssi(channelIndex) , 2, rx5808.getRssi(channelIndex), WHITE, WHITE);
-    }
-
-    TV.println(92, 3, timer, DEC);
-    TV.delay(500);
-  }
-  timer = 9;
-}
-
-uint8_t osd_submenu(u8 band) {
-  int i;
-  uint8_t menu_pos;
-  timer = 9;
-  while (timer-- > 0) {
-    menu_pos = readSwitch();
-
-    if (last_post_switch != menu_pos) { //something changed by user
-      TV.clear_screen();
-      TV.draw_rect(1, 1, 100, 94,  WHITE); //draw frame
-
-      //show the channels list and the % RSSI
-      for (i = 0; i < 8; i++) {
-        TV.println(10, 3 + i * MENU_Y_SIZE, pgm_read_word_near(channelFreqTable + (8 * band) + i), DEC); //channel name
-
-        TV.println(60, 3 + i * MENU_Y_SIZE, rx5808.getVal(band, i, 100), DEC); //RSSI
-        TV.printPGM(78, 3 + i * MENU_Y_SIZE, PSTR("%")); //percentage symbol
-      }
-
-      timer = 9;
-      last_post_switch = menu_pos;
-      TV.draw_rect(9, 2 + menu_pos * MENU_Y_SIZE, 90, 7,  WHITE, INVERT); //current selection
-    }
-
-    TV.println(92, 3, timer, DEC);
-    TV.delay(1000);
-  }
-
-  TV.clear_screen();
-  TV.printPGM(0, 50, PSTR("SETTING\nFREQUENCY..."));
-
-  return menu_pos;
-
-}
-
-
-#endif
-
-
-
-
-
-
+#endif //USE OSD
 
 //////********* SETUP ************////////////////////
 void setup() {
@@ -379,8 +88,6 @@ void setup() {
   last_used_freq = pgm_read_word_near(channelFreqTable + (8 * last_used_band) + last_used_freq_id); //freq
 }
 
-
-
 void autoscan() { //TODO BETA VERSION! diversity not supported
   // RX5808 rx5808B(rssiB, SPI_CSB);
   // rx5808B.init();
@@ -392,133 +99,13 @@ void autoscan() { //TODO BETA VERSION! diversity not supported
   SELECT_A;
 }
 
-
-
 #define RX_A 1
 #define RX_B 0
 
-void set_and_wait(uint8_t band, uint8_t menu_pos) {
-  unsigned rssi_b, rssi_a;
-  u8 current_rx;
-
-
-#ifdef USE_DIVERISTY
-  //init of the second module
-  RX5808 rx5808B(rssiB, SPI_CSB);
-  rx5808B.init();
-  use_freq_diversity(pgm_read_word_near(channelFreqTable + (8 * band) + menu_pos), rx5808, rx5808B); //set the selected freq
-  SELECT_B;
-
-  current_rx = RX_B;
-#else
-  use_freq(pgm_read_word_near(channelFreqTable + (8 * band) + menu_pos), rx5808); //set the selected freq
-  SELECT_A;
-  current_rx = RX_A;
-#endif
-
-  //clear memory for log
-#ifdef ENABLE_RSSILOG
-  uint8_t sample = 0;
-  long g_log_offset = 0;
-  for (g_log_offset = 0 ; g_log_offset < EEPROM.length() / 2 ; g_log_offset++) {
-    EEPROM.write(EEPROM_ADDR_START_LOG + g_log_offset, 0);
-  }
-  g_log_offset = 0;
-#endif
-
-  //save band and freq as "last used"
-  EEPROM.write(EEPROM_ADDR_LAST_FREQ_ID, menu_pos); //freq id
-  EEPROM.write(EEPROM_ADDR_LAST_BAND_ID, band); //channel name
-
-  //MAIN LOOP - change channel and log
-  while (1) {
-    rssi_a = rx5808.getCurrentRSSI();
-#ifdef USE_DIVERSITY
-    rssi_b = rx5808B.getCurrentRSSI();
-#endif
-
-#ifdef ENABLE_RSSILOG
-    //every loop cycle requires ~100ms
-    //total memory available is 492B (512-20) and every sample is 2B -> 246 sample in total
-    //if we take 2 sample per seconds we have 123 seconds of recording (~2 minutes)
-    if (++sample >= 2) {
-      sample = 0;
-
-      //FORMAT IS XXXXXXXRYYYYYYYY (i.e. 7bit for RSSI_B - 1bit for RX used - 8bit for RSSI_A
-      if (g_log_offset < EEPROM.length() / 2)
-        EEPROM.put(EEPROM_ADDR_START_LOG + g_log_offset, ((uint16_t)(((rssi_b & 0xFE) | (current_rx & 0x1)) & 0xFF) << 8) | (rssi_a & 0xFF));
-
-      g_log_offset += sizeof(uint16_t);
-    }
-#endif
-
-#ifdef DEBUG
-    Serial.print("A: ");
-    Serial.print(rssi_a, DEC);
-
-    Serial.print("\tB: ");
-    Serial.print(rssi_b, DEC);
-
-    Serial.print("\twe are using: ");
-    if (current_rx == RX_A) {
-      Serial.print("\tA");
-      Serial.print("\twe change at: ");
-      Serial.println(rssi_a + RX_HYST, DEC);
-    } else {
-      Serial.print("\tB");
-      Serial.print("\twe change at: ");
-      Serial.println(rssi_b + RX_HYST, DEC);
-    }
-    TV.delay(500);
-#endif
-
-#ifdef USE_DIVERISTY
-    if (current_rx == RX_B && rssi_a > rssi_b + RX_HYST) {
-      SELECT_A;
-      current_rx = RX_A;
-    }
-
-    if (current_rx == RX_A && rssi_b > rssi_a + RX_HYST) {
-      SELECT_B;
-      current_rx = RX_B;
-    }
-#endif
-
-    menu_pos = readSwitch();
-
-    if (last_post_switch != menu_pos) { //something changed by user
-#ifdef USE_DIVERSITY
-      use_freq_diversity(pgm_read_word_near(channelFreqTable + (8 * band) + menu_pos), rx5808, rx5808B); //set the selected freq
-#else
-      use_freq(pgm_read_word_near(channelFreqTable + (8 * band) + menu_pos), rx5808); //set the selected freq
-#endif
-      EEPROM.write(EEPROM_ADDR_LAST_FREQ_ID, menu_pos);
-
-
-    }
-    last_post_switch = menu_pos;
-
-  } //end of loop
-
-}
-/*
-void submenu(uint8_t pos) {
-
-  uint8_t i;
-  // last_post_switch = -1; //force start
-  uint8_t band = pos - 1;
-  uint8_t menu_pos = readSwitch();
-
-#ifdef USE_OLED
-  oled_submenu(menu_pos, band);
-#else
-  menu_pos = osd_dsubmenu(menu_pos, band);
-#endif
-}
-*/
 void scanner_mode() {
 
-#ifndef USE_OLED
+#ifdef USE_OLED
+#else
   osd_scanner();
 #endif
 
@@ -557,21 +144,26 @@ void loop(void) {
         autoscan();
         break;
       default:
-
         if (in_mainmenu) {
           in_mainmenu = 0;
           menu_band = menu_pos - 1;
           timer = TIMER_INIT_VALUE;
         } else { //after selection of band AND freq by the user
+
+          //please wait message
+#ifdef USE_OLED
+          oled_waitmessage();
+          delay(800);
+#else
+          osd_waitmessage() ;
+          TV.delay(800);
+#endif
           set_and_wait(menu_band, menu_pos);
           timer = 0;
         }
-
-
         break;
     }
   }
-
 
   if (in_mainmenu) { //on main menu
 #ifdef USE_OLED
@@ -579,6 +171,7 @@ void loop(void) {
     delay(1000);
 #else
     osd_mainmenu(menu_pos) ;
+    TV.delay(1000);
 #endif
   } else { //on submenu
 #ifdef USE_OLED
@@ -586,7 +179,7 @@ void loop(void) {
     delay(1000);
 #else
     osd_submenu(menu_pos,  menu_band);
+    TV.delay(1000);
 #endif
   }
-
 }
