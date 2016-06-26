@@ -153,13 +153,15 @@ void loop(void) {
         } else { //after selection of band AND freq by the user
 
           //please wait message
+#ifdef USE_DIVERSITY
 #ifdef USE_OLED
           oled_waitmessage();
           delay(800);
 #else
           osd_waitmessage() ;
           TV.delay(800);
-#endif
+#endif //OLED 
+#endif //DIVERSITY
           set_and_wait(menu_band, menu_pos);
           timer = 0;
         }

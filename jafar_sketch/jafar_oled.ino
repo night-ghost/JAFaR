@@ -48,7 +48,7 @@ void oled_splash() {
 
 
 void oled_init(void) { // flip screen, if required
-  // u8g.setRot180();
+  u8g.setRot180();
 
   // set SPI backup if required
   //u8g.setHardwareBackup(u8g_backup_avr_spi);
@@ -87,7 +87,7 @@ uint8_t oled_submenu(uint8_t menu_pos, uint8_t band) {
         u8g.setDefaultBackgroundColor();
       }
 
-      sprintf (j_buf, "%d %d", pgm_read_word_near(channelFreqTable + (8 * band) + i), rx5808.getVal(band, i, 100));
+      sprintf (j_buf, "%d     %d", pgm_read_word_near(channelFreqTable + (8 * band) + i), rx5808.getVal(band, i, 100));
       u8g.drawStr( 0, 8 + i * 8, j_buf);
     }
 
@@ -101,7 +101,7 @@ void oled_mainmenu(uint8_t menu_pos) {
   int i;
   u8g.setFont(u8g_font_6x10);
 
-  sprintf (j_buf, "LAST USED: %x:%d  %d", pgm_read_byte_near(channelNames + (8 * last_used_band) + last_used_freq_id), last_used_freq, timer); //last used freq
+  sprintf (j_buf, "last used: %x:%d  %d", pgm_read_byte_near(channelNames + (8 * last_used_band) + last_used_freq_id), last_used_freq, timer); //last used freq
   char *menu_strings[MENU_ITEMS] {j_buf, "BAND A", "BAND B", "BAND E", "BAND FATSHARK", "RACEBAND", "SCANNER", "AUTOSCAN"};
 
   u8g.firstPage();
@@ -114,6 +114,9 @@ void oled_mainmenu(uint8_t menu_pos) {
         u8g.setDefaultBackgroundColor();
       }
       u8g.drawStr( 0, 8 + i * 8, menu_strings[i]);
+      u8g.setPrintPos(80, 8 + i * 8); //RSSI value  (only for the "real" bands
+      if (i > 0 && i<6)
+        u8g.print(rx5808.getMaxValBand(i-1, 100));
     }
 
   } while ( u8g.nextPage() );
@@ -130,7 +133,6 @@ void oled_scanner() {
 
   uint8_t s_timer = 9;
   while (s_timer-- > 0) {
-
     u8g.firstPage();
     do {
       u8g.drawStr(FRAME_START_X, FRAME_START_Y, "BAND");

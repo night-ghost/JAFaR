@@ -126,7 +126,7 @@ void osd_scanner() {
       TV.draw_rect(10 + 2 * i, 10 + BIN_H - rx5808.getRssi(channelIndex) , 2, rx5808.getRssi(channelIndex), WHITE, WHITE);
     }
 
-    TV.println(92, 3, timer, DEC);
+    TV.println(92, 3, s_timer, DEC);
     TV.delay(500);
   }
   s_timer = 9;
