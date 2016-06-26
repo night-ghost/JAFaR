@@ -83,7 +83,7 @@ uint8_t oled_submenu(uint8_t menu_pos, uint8_t band) {
       u8g.setDefaultForegroundColor();
       if (i == menu_pos) {
 
-        u8g.drawBox(0, 1 + menu_pos * 8, 110, 8);
+        u8g.drawBox(0, 1 + menu_pos * 8, 127, 7);
         u8g.setDefaultBackgroundColor();
       }
 
@@ -109,9 +109,8 @@ void oled_mainmenu(uint8_t menu_pos) {
 
     for (i = 0; i < MENU_ITEMS; i++) {
       u8g.setDefaultForegroundColor();
-      if (i == menu_pos) {
-
-        u8g.drawBox(0, 1 + menu_pos * 8, 110, 7);
+      if (i == menu_pos) { //selection
+        u8g.drawBox(0, 1 + menu_pos * 8, 127, 7);
         u8g.setDefaultBackgroundColor();
       }
       u8g.drawStr( 0, 8 + i * 8, menu_strings[i]);
@@ -120,5 +119,64 @@ void oled_mainmenu(uint8_t menu_pos) {
   } while ( u8g.nextPage() );
 }
 
+//only one screen to show all the channels
+//funtction taken from the project: github.com/MikyM0use/OLED-scanner
+#define FRAME_START_X 0
+#define FRAME_START_Y 7
+void oled_scanner() {
+
+  uint8_t i;
+  u8g.setFont(u8g_font_6x10);
+
+  uint8_t s_timer = 9;
+  while (s_timer-- > 0) {
+
+    u8g.firstPage();
+    do {
+      u8g.drawStr(FRAME_START_X, FRAME_START_Y, "BAND");
+      u8g.drawStr(FRAME_START_X + 80, FRAME_START_Y, "FREE CH");
+
+      u8g.drawStr(FRAME_START_X + 15, FRAME_START_Y + 12, "A");
+      u8g.drawStr(FRAME_START_X + 15, FRAME_START_Y + 22, "B");
+      u8g.drawStr(FRAME_START_X + 15, FRAME_START_Y + 32, "E");
+      u8g.drawStr(FRAME_START_X + 15, FRAME_START_Y + 42, "F");
+      u8g.drawStr(FRAME_START_X + 15, FRAME_START_Y + 52, "R");
+
+      u8g.drawLine(25, 0, 25, 60); //start
+      u8g.drawLine(76, 0, 76, 60); //end
+
+#define START_BIN FRAME_START_X+29
+
+#define BIN_H_LITTLE 9
+#define START_BIN_Y 13
+
+      //computation of the min value
+      for (i = 0; i < 5; i++) {
+        uint16_t chan = rx5808.getMinPosBand(i);
+        sprintf (j_buf, "%x %d", pgm_read_byte_near(channelNames + chan), pgm_read_word_near(channelFreqTable + chan));
+        u8g.drawStr(FRAME_START_X + 80, FRAME_START_Y + 10 * i + 12, j_buf);
+      }
+
+      for (i = 0; i < 8; i++) {
+        uint8_t bin = rx5808.getVal(0, i, BIN_H_LITTLE);
+        u8g.drawBox(START_BIN + i * 6, FRAME_START_Y + START_BIN_Y - bin, 2, bin);
+
+        bin = rx5808.getVal(1, i, BIN_H_LITTLE);
+        u8g.drawBox(START_BIN + i * 6, FRAME_START_Y + START_BIN_Y - bin + 10, 2, bin);
+
+        bin = rx5808.getVal(2, i, BIN_H_LITTLE);
+        u8g.drawBox(START_BIN + i * 6, FRAME_START_Y + START_BIN_Y - bin + 20, 2, bin);
+
+        bin = rx5808.getVal(3, i, BIN_H_LITTLE);
+        u8g.drawBox(START_BIN + i * 6, FRAME_START_Y + START_BIN_Y - bin + 30, 2, bin);
+
+        bin = rx5808.getVal(4, i, BIN_H_LITTLE);
+        u8g.drawBox(START_BIN + i * 6, FRAME_START_Y + START_BIN_Y - bin + 40, 2, bin);
+      }
+
+    } while ( u8g.nextPage() );
+    delay(1000);
+  }
+}
 
 #endif //OLED

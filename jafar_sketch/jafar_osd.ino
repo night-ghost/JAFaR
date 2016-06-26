@@ -110,9 +110,8 @@ void osd_mainmenu(uint8_t menu_pos) {
 }
 
 void osd_scanner() {
-  uint8_t menu_pos;
-  timer = 9;
-  while (timer-- > 0) {
+  uint8_t s_timer = 9;
+  while (s_timer-- > 0) {
     rx5808.scan(1, BIN_H);
     TV.clear_screen();
     TV.draw_rect(1, 1, 100, 94,  WHITE);
@@ -130,6 +129,6 @@ void osd_scanner() {
     TV.println(92, 3, timer, DEC);
     TV.delay(500);
   }
-  timer = 9;
+  s_timer = 9;
 }
 #endif //not USE_OLED

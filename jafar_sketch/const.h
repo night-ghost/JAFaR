@@ -26,7 +26,7 @@ This file is part of Fatshark© goggle rx module project (JAFaR).
 
 //ONLY ONE OF THE FOLLOWING:
 //#define USE_DIVERSITY
-#define USE_OLED 
+#define USE_OLED
 
 
 #define TIMER_INIT_VALUE 7

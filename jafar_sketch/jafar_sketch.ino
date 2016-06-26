@@ -105,10 +105,12 @@ void autoscan() { //TODO BETA VERSION! diversity not supported
 void scanner_mode() {
 
 #ifdef USE_OLED
+  oled_scanner();
 #else
   osd_scanner();
 #endif
 
+  timer = TIMER_INIT_VALUE;
 }
 
 void loop(void) {
