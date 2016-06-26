@@ -98,6 +98,39 @@ __DIY Instructions__
 
 TODO
 
+##OLED module
+It's now possible to use an external SPI OLED module in case of any problems with the internal OSD
+or to use the module with an external monitor / different goggles.
+
+<img src="/docs/oled_pic.jpg" width="50%" height="50%" />
+
+I'm working on the PCB of the module, but it's only a matter of connection between the OLED and the strip pins
+on the base module (originally only for the external diversity module).
+
+To use the OLED module instead of the internal OSD, uncomment 
+
+```
+#define USE_OLED
+```
+
+in the file const.h
+
+please remember to comment #define USE_DIVERSITY!
+
+__Connections__
+
+| ATMEGA328p pin        |  PCB silkscreen name           | OLED silkscreen name  |
+| :-------------------:	|:------------------------------:| :--------------------:|
+| VCC      				| 		EN 						| 		VCC 			|
+| GND      				| GND 							| 					GND |
+| 8      				| SSEL 							| 				SCL 	|
+| A1      				| RSSI      					|   		SDA 		|
+| A4 					|  NOT CONNECTED      			|    	NOT CONNECTED 	|
+| 11 					| SDA      						|    DC 				|
+| 13				 	| CLK      						|    RESET 				|
+
+
+
 ##Reference thread 
 
 http://www.rcgroups.com/forums/showthread.php?t=2619124 while I'm still writing the readme :)
