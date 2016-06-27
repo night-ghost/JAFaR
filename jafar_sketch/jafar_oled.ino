@@ -90,9 +90,10 @@ uint8_t oled_submenu(uint8_t menu_pos, uint8_t band) {
       sprintf (j_buf, "%d     %d", pgm_read_word_near(channelFreqTable + (8 * band) + i), rx5808.getVal(band, i, 100));
       u8g.drawStr( 0, 8 + i * 8, j_buf);
     }
-
+#ifndef STANDALONE
     u8g.setPrintPos(110, 10);
-    u8g.print(timer);
+    u8g.print((int)timer);
+#endif
 
   } while ( u8g.nextPage() );
 }
@@ -101,7 +102,12 @@ void oled_mainmenu(uint8_t menu_pos) {
   int i;
   u8g.setFont(u8g_font_6x10);
 
-  sprintf (j_buf, "last used: %x:%d  %d", pgm_read_byte_near(channelNames + (8 * last_used_band) + last_used_freq_id), last_used_freq, timer); //last used freq
+#ifdef STANDALONE
+  sprintf (j_buf, "last used: %x:%d", pgm_read_byte_near(channelNames + (8 * last_used_band) + last_used_freq_id), last_used_freq); //last used freq
+#else
+  sprintf (j_buf, "last used: %x:%d  %d", pgm_read_byte_near(channelNames + (8 * last_used_band) + last_used_freq_id), last_used_freq, (int)timer); //last used freq
+#endif
+
   char *menu_strings[MENU_ITEMS] {j_buf, "BAND A", "BAND B", "BAND E", "BAND FATSHARK", "RACEBAND", "SCANNER", "AUTOSCAN"};
 
   u8g.firstPage();
@@ -115,8 +121,8 @@ void oled_mainmenu(uint8_t menu_pos) {
       }
       u8g.drawStr( 0, 8 + i * 8, menu_strings[i]);
       u8g.setPrintPos(80, 8 + i * 8); //RSSI value  (only for the "real" bands
-      if (i > 0 && i<6)
-        u8g.print(rx5808.getMaxValBand(i-1, 100));
+      if (i > 0 && i < 6)
+        u8g.print(rx5808.getMaxValBand(i - 1, 100));
     }
 
   } while ( u8g.nextPage() );
@@ -131,8 +137,9 @@ void oled_scanner() {
   uint8_t i;
   u8g.setFont(u8g_font_6x10);
 
-  uint8_t s_timer = 9;
-  while (s_timer-- > 0) {
+  timer = TIMER_INIT_VALUE;
+  while (timer > 0) {
+
     u8g.firstPage();
     do {
       u8g.drawStr(FRAME_START_X, FRAME_START_Y, "BAND");
@@ -177,7 +184,13 @@ void oled_scanner() {
       }
 
     } while ( u8g.nextPage() );
-    delay(1000);
+    delay(LOOPTIME);
+
+#ifdef STANDALONE
+    menu_pos = readSwitch();
+#else
+    timer -= (LOOPTIME / 1000.0);
+#endif
   }
 }
 

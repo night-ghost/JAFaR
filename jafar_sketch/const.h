@@ -22,14 +22,15 @@ This file is part of Fatshark© goggle rx module project (JAFaR).
 
 //#define DEBUG
 #define ENABLE_RSSILOG
-//#define FORCE_FIRST_MENU_ITEM
+//#define FORCE_FIRST_MENU_ITEM //force always the first menu item (last freq used)
+#define STANDALONE
 
 //ONLY ONE OF THE FOLLOWING:
-#define USE_DIVERSITY
-//#define USE_OLED
+//#define USE_DIVERSITY
+#define USE_OLED
 
-
-#define TIMER_INIT_VALUE 7
+#define LOOPTIME 200
+#define TIMER_INIT_VALUE 7.0
 #define CH1 2
 #define CH2 3
 #define CH3 4
