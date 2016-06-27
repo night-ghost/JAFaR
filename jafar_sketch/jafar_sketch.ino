@@ -27,8 +27,9 @@ This file is part of Fatshark© goggle rx module project (JAFaR).
 RX5808 rx5808(rssiA, SPI_CSA);
 
 uint8_t last_post_switch, do_nothing, flag_first_pos,  in_mainmenu, menu_band;
-int8_t timer;
+float timer;
 uint16_t last_used_freq, last_used_band, last_used_freq_id;
+uint8_t menu_pos;
 
 #ifdef USE_OLED
 
@@ -51,6 +52,13 @@ void setup() {
 #ifdef DEBUG
   Serial.begin(9600);
 #endif
+
+#ifdef STANDALONE
+  pinMode(CH1, INPUT_PULLUP); //UP
+  pinMode(CH2, INPUT_PULLUP); //ENTER
+  pinMode(CH3, INPUT_PULLUP); //DOWN
+#endif
+  //menu_pos = 5;
 
   //video out init
   pinMode(SW_CTRL1, OUTPUT);
@@ -75,13 +83,13 @@ void setup() {
 #ifdef FORCE_FIRST_MENU_ITEM
   flag_first_pos = readSwitch();
   last_post_switch = 0;
-  timer = 9;
 #else
   last_post_switch = -1; //init menu position
 #endif
   do_nothing = 0;
 
   in_mainmenu = 1;
+  timer = TIMER_INIT_VALUE;
 
   last_used_band = EEPROM.read(EEPROM_ADDR_LAST_BAND_ID); //channel name
   last_used_freq_id = EEPROM.read(EEPROM_ADDR_LAST_FREQ_ID);
@@ -117,8 +125,9 @@ void loop(void) {
   if (do_nothing)
     return;
 
-  uint8_t menu_pos = readSwitch();
+  menu_pos = readSwitch();
 
+  //force always the first menu item (last freq used)
 #ifdef FORCE_FIRST_MENU_ITEM
   if (flag_first_pos == menu_pos)
     menu_pos = 0;
@@ -126,11 +135,13 @@ void loop(void) {
 
   uint8_t i;
 
+#ifndef STANDALONE
   if (last_post_switch != menu_pos) {
     flag_first_pos = 0;
     timer = TIMER_INIT_VALUE;
   }
-  else timer--;
+  else timer -= (LOOPTIME / 1000.0);
+#endif
 
   last_post_switch = menu_pos;
 
@@ -172,18 +183,18 @@ void loop(void) {
   if (in_mainmenu) { //on main menu
 #ifdef USE_OLED
     oled_mainmenu(menu_pos);
-    delay(1000);
+    delay(LOOPTIME);
 #else
     osd_mainmenu(menu_pos) ;
-    TV.delay(1000);
+    TV.delay(LOOPTIME);
 #endif
   } else { //on submenu
 #ifdef USE_OLED
     oled_submenu(menu_pos,  menu_band);
-    delay(1000);
+    delay(LOOPTIME);
 #else
     osd_submenu(menu_pos,  menu_band);
-    TV.delay(1000);
+    TV.delay(LOOPTIME);
 #endif
   }
 }
