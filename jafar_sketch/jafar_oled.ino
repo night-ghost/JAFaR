@@ -18,6 +18,14 @@ This file is part of Fatshark© goggle rx module project (JAFaR).
   */
 #ifdef USE_OLED
 
+void oled_message(char *str) {
+  u8g.setFont(u8g_font_8x13);
+  u8g.firstPage();
+  do {
+    u8g.drawStr( 0, 20, str);
+  } while ( u8g.nextPage() );
+}
+
 void oled_waitmessage() {
   u8g.setFont(u8g_font_8x13);
   u8g.firstPage();

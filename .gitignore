@@ -23,3 +23,5 @@ Thumbs.db
 # Eagle lock #
 ###################
 *.lck
+*.b#*
+*.s#*

@@ -61,7 +61,7 @@ void osd_submenu(int8_t menu_pos, uint8_t band) {
   TV.draw_rect(9, 2 + menu_pos * MENU_Y_SIZE, 90, 7,  WHITE, INVERT); //current selection
   //  }
 
-  TV.println(92, 3, timer, DEC);
+  TV.println(92, 3, (int)timer, DEC);
 
   //}
 
@@ -83,7 +83,7 @@ void osd_mainmenu(uint8_t menu_pos) {
   TV.draw_rect(1, 1, 100, 94,  WHITE);
 
   //header and countdown
-  TV.println(92, 3, timer, DEC);
+  TV.println(92, 3, (int)timer, DEC);
 
   //last used band,freq
   TV.printPGM(10, 3 , PSTR("LAST:"));
@@ -126,7 +126,7 @@ void osd_scanner() {
       TV.draw_rect(10 + 2 * i, 10 + BIN_H - rx5808.getRssi(channelIndex) , 2, rx5808.getRssi(channelIndex), WHITE, WHITE);
     }
 
-    TV.println(92, 3, s_timer, DEC);
+    TV.println(92, 3, (int)s_timer, DEC);
     TV.delay(500);
   }
   s_timer = 9;
