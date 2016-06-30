@@ -85,6 +85,24 @@ void set_and_wait(uint8_t band, uint8_t menu_pos) {
   EEPROM.write(EEPROM_ADDR_LAST_FREQ_ID, menu_pos); //freq id
   EEPROM.write(EEPROM_ADDR_LAST_BAND_ID, band); //channel name
 
+/*
+U8GLIB_SSD1306_128X64 u8g2(8, A1, A4, 11 , 13); //CLK, MOSI, CS, DC, RESET
+ u8g2.setFont(u8g_font_8x13);
+  u8g2.firstPage();
+  do {
+    u8g2.drawStr( 0, 20, "JAFaR Project");
+    u8g2.drawStr( 0, 35, "by MikyM0use");
+
+    u8g2.setFont(u8g_font_6x10);
+    sprintf (j_buf, "RSSI MIN %d", rssi_min); //Rssi min
+    u8g2.drawStr(0, 50, j_buf);
+
+    sprintf (j_buf, "RSSI MAX %d", rssi_max); //Rssi max
+    u8g2.drawStr(0, 60, j_buf);
+  } while ( u8g2.nextPage() );
+  delay(4000);
+*/
+
   //MAIN LOOP - change channel and log
   while (1) {
     rssi_a = rx5808.getCurrentRSSI();
