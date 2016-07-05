@@ -42,11 +42,26 @@ __MAIN MODULE (V4.0) BOM__
 
 https://docs.google.com/spreadsheets/d/1CrZzOQHyK_d1VfHCQKwdNuoyMji0IYryI1VuffojdGA/edit?usp=sharing
 
+__LEGACY MAIN MODULE (V3.2)__
+
+This module is actually the same as the v4.0, but it doesn't have the buffer on the RSSI output, 
+and the PCB allows the use of a capacitor OR a resistor on the video out. DON'T use both! after some
+tests I realized that a 10ohm resistor (and no cap) is enough.
+
+<p align="center">
+<img src="/docs/base_front_32.jpg" width="50%" height="50%" />
+<img src="/docs/base_back_32.jpg" width="50%" height="50%" />
+</p>
+
+__LEGACY MAIN MODULE (V3.2) BOM__
+
+https://docs.google.com/spreadsheets/d/1-763imBV3QsQ71GKDZH-BirTz1k32szNuJZUKQrE00g/edit?usp=sharing
+
 __DIY Instructions__
 
 stages to success:
 
-*1) follow the instructions on the page https://www.arduino.cc/en/Tutorial/ArduinoISP to program the module (select "arduino micro" as target board)
+*1) follow the instructions on the page https://www.arduino.cc/en/Tutorial/ArduinoISP to program the module (select "Arduino Pro Mini 5v 16MHz" as target board)
 
 *2) after the burn of the bootloader, use the FTDI connections in the upper right corner of the board to flash the code present in the Github page of the project
 
@@ -61,12 +76,31 @@ stages to success:
 
 *9) if you press the "selection" buttons of the goggles now, you change the frequency by the 8 frequencies of the previously selected band.
 
-note ONLY FOR 3.2 version of the PCB: the PCB allow the use of a capacitor OR a resistor on the video out. DON'T use both!
 
-__Troubleshooting__
+##MAIN MODULE Troubleshooting
 
 After the initial calibration, the module must turn on in couple of seconds and you must see the splash screen for some seconds before the "band selection" screen.
-In the "band selection" screen you can see the 5 bands with the percentage of the maximum RSSI detected on that band. At least one of the band must be at 98-100%. If you "enter" one band, every channel must shows a different percentage of RSSI, otherwise the SPI-mod of the module couls be failed.
+In the "band selection" screen you can see the 5 bands with the percentage of the maximum RSSI detected on that band. At least one of the band must be at 98-100%. 
+If you "enter" one band, every channel must shows a different percentage of RSSI, otherwise the SPI-mod of the module could be failed.
+
+__Unable to flash/Aduino issues:__
+
+(thanks to pHysiX for the help in this section!)
+Got the error "no reply" when trying to load the firmware:
+the ATmega microcontroller is not soldered properly / there is a short on some pins.
+try a quick solder, clean and reflow.
+
+Got the error "incorrect signature" when trying to load the firmware:
+This means Arduino is able to pick up the ATMega, but it was not communicating as expected. 
+This is related to poor soldering of the crystal. It's possible to do the crystal using 
+an iron, but I strongly recommend using flow method/hot air to do this, to make sure you 
+don't short the three legs accidentally onto the metal case.
+
+__Display issues:__
+
+they are mostly related to poor soldering for the OSD components on the board. Go back and 
+reflow especially the Switch, and then just make sure to clean up and touch up all the caps 
+and resistors near and around the switch.
 
 If you have an external monitor, you can bypass the digital switch by power on the module with external 5v and connecting the "video in" of the monitor on the test point marked in yellow the picture:
 
@@ -76,6 +110,10 @@ and you should see the splash screen and the menu.
 
 if you connect the "video in" of the monitor to the test point marked in green, you should see the initial scanning (used to determine the % of the RSSI on each channel), this means a sequence of different "fogs" and (at least) one "good" image (for a fraction of second), if you have a Vtx + cam transmitting. 
 
+__Frequency issues:__
+If the module is having trouble Setting Frequency, or you are not getting video when you are 
+on the right channel and frequency, make sure the SPI mod has been done, and that the RX5808 
+is soldered on well. Pretty hard to mess this part up.
 
 ##Diversity module
 
@@ -104,10 +142,7 @@ or to use the module with an external monitor / different goggles.
 
 <img src="/docs/oled_pic.jpg" width="50%" height="50%" />
 
-I'm working on the PCB of the module, but it's only a matter of connection between the OLED and the strip pins
-on the base module (originally only for the external diversity module).
-
-To use the OLED module instead of the internal OSD, uncomment 
+To use the OLED module instead of the internal OSD, uncomment  the line:
 
 ```
 #define USE_OLED
@@ -129,7 +164,13 @@ __Connections__
 | 11 					| SDA      						|    DC 				|
 | 13				 	| CLK      						|    RESET 				|
 
+...or graphically:
 
+<p align="center">
+<img src="/docs/oled_connections.jpg" width="50%" height="50%" />
+</p>
+
+there's also a "PCB" inside the PCBs folder, but it's just a simple adaptor.
 
 ##Reference thread 
 
