@@ -18,10 +18,10 @@ technical details:
 * frequency selection via OSD inside the goggles
 * I tested it only with Fatshark HD but the module should work with every fatshark with the RX external module (like Dominator V1, V2, V3, HD, HD2...)
 
-This project uses the “rx5808” receiver module, which can be hacked to be SPI-programmed by a microcontroller (more details later).
+This project uses the “RX5808” receiver module, which can be hacked to be SPI-programmed by a microcontroller (more details later).
 So what I needed is a micro controller with an easy and well-know software IDE… nothing better than Arduino. So I decided to use an Atmega 328p as micro controller.
 
-To select the frequency there's a series of menus on the screen inside the goggles, the useful TVOUT Arduino library is perfect and requires just a couple of resistors ([url]http://playground.arduino.cc/Main/TVout[/url]). A digital switch (TS5A3359) allow to switch from OSD to the normal receiving video from the quadcopter.
+To select the frequency there's a series of menus on the screen inside the goggles, the useful TVOUT Arduino library is perfect and requires just a couple of resistors (http://playground.arduino.cc/Main/TVout). A digital switch (TS5A3359) allow to switch from OSD to the normal receiving video from the quadcopter.
 
 The project is mainly divided into two PCBs: 
 * one main base module 
@@ -29,9 +29,11 @@ The project is mainly divided into two PCBs:
 
 ##Main module
 
-the main module is usable alone as a 40ch receiver module, but if you connect the second external module, 
-the microcontroller onboard can decide which one to use (so-called "diversity") based on the received signal strength. Indeed, this RX5808 modules has an analog output called RSSI proportional on the "quality" of the signal.
-on the base module the frequency is set by the user using an OSD menu.
+This is the main RX module, usable alone as a 40ch receiver module, but if you connect an 
+"external" module, the onboard microcontroller can decide which RX module has better 
+reception (so-called "diversity") based on the received signal strength. Indeed, this 
+RX5808 modules has an analog output called RSSI proportional on the "quality" of the 
+received video signal. The receiving video channel (frequency) is set by the user using an OSD menu.
 
 <p align="center">
 <img src="/docs/base_front.jpg" width="50%" height="50%" />
@@ -50,8 +52,9 @@ tests I realized that a 10ohm resistor (and no cap) is enough.
 
 <p align="center">
 <img src="/docs/base_front_32.jpg" width="50%" height="50%" />
-<img src="/docs/base_back_32.jpg" width="50%" height="50%" />
 </p>
+
+(the back side is the same of the v4.0).
 
 __LEGACY MAIN MODULE (V3.2) BOM__
 
@@ -61,20 +64,24 @@ __DIY Instructions__
 
 stages to success:
 
-*1) follow the instructions on the page https://www.arduino.cc/en/Tutorial/ArduinoISP to program the module (select "Arduino Pro Mini 5v 16MHz" as target board)
+1. Follow the instructions on the page https://www.arduino.cc/en/Tutorial/ArduinoISP to program the module (select __"Arduino Pro Mini 5v 16MHz"__ as target board)
+using the pins in the upper right corner of the board
 
-*2) after the burn of the bootloader, use the FTDI connections in the upper right corner of the board to flash the code present in the Github page of the project
+2. After the burn of the bootloader, use the FTDI connections in the left side of the board to flash the code present in the Github page of the project
 
-*3) the very first time you power on the module, it need to calibrate itself. So please turn on the module with a Vtx a couple of meter away (the video frequency doen't matter). This process can take a while (about 30-50 seconds).
+3. The very first time you power on the module, it need to calibrate itself. So please turn on the module with a working Vtx a couple of meter away (the video frequency doesn't matter). This process can take a while (about 30-50 seconds).
 
-*4) when you power on the module, BOTH the leds (upper left corner of the pcb) must be on, and you must see a relatively stable splash screen for about 5 seconds
-*5) you can now use the "selection" buttons on the goggles to scroll up/down the menu to select the band
-*6) after the timout of the countdown (upper left corner of the screen) you entered the frequency selection (of the selected band)
-*7) scroll up/down to select the frequency and wait the timeout
+4. When you power on the module, BOTH the leds (upper left corner of the pcb) must be on, and you must see a relatively stable splash screen for about 5 seconds
 
-*8) at this moment only one led on the module has to be ON, it means that the RX video output is routed to the video_input of the goggles. If you have a Vtx near, you should see the video coming from it. 
+5. You can now use the "selection" buttons on the goggles to scroll up/down the menu to select the band
 
-*9) if you press the "selection" buttons of the goggles now, you change the frequency by the 8 frequencies of the previously selected band.
+6. After the timout of the countdown (upper left corner of the screen) you entered the frequency selection (of the selected band)
+
+7. Scroll up/down to select the frequency and wait the timeout
+
+8. At this moment only one led on the module has to be ON, it means that the RX video output is routed to the video_input of the goggles. If you have a Vtx near, you should see the video coming from it. 
+
+9. If you press the "selection" buttons of the goggles now, you change the frequency by the 8 frequencies of the previously selected band.
 
 
 ##MAIN MODULE Troubleshooting
@@ -98,7 +105,7 @@ don't short the three legs accidentally onto the metal case.
 
 __Display issues:__
 
-they are mostly related to poor soldering for the OSD components on the board. Go back and 
+They are mostly related to poor soldering for the OSD components on the board. Go back and 
 reflow especially the Switch, and then just make sure to clean up and touch up all the caps 
 and resistors near and around the switch.
 
@@ -108,7 +115,7 @@ If you have an external monitor, you can bypass the digital switch by power on t
 
 and you should see the splash screen and the menu.
 
-if you connect the "video in" of the monitor to the test point marked in green, you should see the initial scanning (used to determine the % of the RSSI on each channel), this means a sequence of different "fogs" and (at least) one "good" image (for a fraction of second), if you have a Vtx + cam transmitting. 
+If you connect the "video in" of the monitor to the test point marked in green, you should see the initial scanning (used to determine the % of the RSSI on each channel), this means a sequence of different "fogs" and (at least) one "good" image (for a fraction of second), if you have a Vtx + cam transmitting. 
 
 __Frequency issues:__
 If the module is having trouble Setting Frequency, or you are not getting video when you are 
@@ -118,29 +125,29 @@ is soldered on well. Pretty hard to mess this part up.
 ##Diversity module
 
 The diversity module is an optional second receiver, connected to the "main" base module, it has:
-*integrated linear 5v regulator with ENABLE feature connected to the VCC of the main module. In fact power a second module from the internal goggles voltage regulator IS VERY DANGEROUS!
-*an optinal operational buffer for RSSI signal (I noticed that lately modules seems to be more delicate)
+* integrated linear 5v regulator with ENABLE feature connected to the VCC of the main module. 
+In fact power a second module from the internal goggles voltage regulator IS VERY DANGEROUS!
+* an optional operational buffer for RSSI signal (I noticed that lately modules seems to be more delicate)
 
 <p align="center">
 <img src="/docs/diversity_front.jpg" width="50%" height="50%" />
 <img src="/docs/diversity_back.jpg" width="50%" height="50%" />
-<p>
+</p>
 
-please notice that because of the linear regulator it's not possibile to use a 3s battery to power the diversity module at the moment.
+please notice that because of the linear regulator it's not possibile to use a 3s battery to power the diversity module.
 
 __DIVERSITY MODULE (V2.1) BOM__
 
 https://docs.google.com/spreadsheets/d/1OpagubuxicmGTKqOHWwWdxZxY6wCs_DZqTYRxVoD4Tc/edit?usp=sharing
 
-__DIY Instructions__
-
-TODO
 
 ##OLED module
-It's now possible to use an external SPI OLED module in case of any problems with the internal OSD
+It's possible to use an external SPI OLED module in case of any problems with the internal OSD
 or to use the module with an external monitor / different goggles.
 
 <img src="/docs/oled_pic.jpg" width="50%" height="50%" />
+
+It's important that the module has only SDA/SCL/RES/DC pins.
 
 To use the OLED module instead of the internal OSD, uncomment  the line:
 
