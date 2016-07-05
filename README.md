@@ -64,7 +64,7 @@ https://docs.google.com/spreadsheets/d/1-763imBV3QsQ71GKDZH-BirTz1k32szNuJZUKQrE
 is the SPI-mod required to control the module with an external microcontroller.
 
 <p align="center">
-<img src="/docs/rx5808mod.jpg" width="50%" height="50%" />
+<img src="/docs/rx5808mod.jpg" width="40%" height="40%" />
 </p>
 
 1. Follow the instructions on the page https://www.arduino.cc/en/Tutorial/ArduinoISP to program the module (select __"Arduino Pro Mini 5v 16MHz"__ as target board)
