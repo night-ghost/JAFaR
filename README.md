@@ -2,21 +2,19 @@
 
 DIY OpenSource 40ch receiver OSD integrated
 
-I'm still writing this documentation, for constant updates please refer to http://www.rcgroups.com/forums/showthread.php?t=2619124 while I'm still writing the readme :)
-
 The aim of the project is to build an opensource 40ch receiver for Fatshark goggles which has to be easy to develop, 
 upgrade and maintain. And, of course, it must be cheap!
 <p align="center">
 <img src="/docs/diversity_goggles.jpg" width="50%" height="50%" />
 </p>
 
-technical details:
+
 * 40ch (8 channels for 5 bands, including race band)
-* no external switch, or hall effect sensor, or buzzer, it must use __only__ the goggles buttons (up-down)
-* auto search feature
-* it should include the “scanner” feature (see my recent project here https://github.com/MikyM0use/OLED-scanner)
-* frequency selection via OSD inside the goggles
-* I tested it only with Fatshark HD but the module should work with every fatshark with the RX external module (like Dominator V1, V2, V3, HD, HD2...)
+* No external switch, or hall effect sensor, or buzzer, it must use __only__ the goggles buttons (up-down)
+* Auto search feature
+* It should include the “scanner” feature (see my recent project here https://github.com/MikyM0use/OLED-scanner)
+* Frequency selection via OSD inside the goggles
+* I tested it only with Fatshark HD but the module should work with every Fatshark with the RX external module (like Dominator V1, V2, V3, HD, HD2...)
 
 This project uses the “RX5808” receiver module, which can be hacked to be SPI-programmed by a microcontroller (more details later).
 So what I needed is a micro controller with an easy and well-know software IDE… nothing better than Arduino. So I decided to use an Atmega 328p as micro controller.
@@ -60,18 +58,23 @@ __LEGACY MAIN MODULE (V3.2) BOM__
 
 https://docs.google.com/spreadsheets/d/1-763imBV3QsQ71GKDZH-BirTz1k32szNuJZUKQrE00g/edit?usp=sharing
 
-__DIY Instructions__
+###DIY Instructions
 
-stages to success:
+0. Remove the shield of the RX5808 module and desolder the resistor marked by the arrow. This 
+is the SPI-mod required to control the module with an external microcontroller.
+
+<p align="center">
+<img src="/docs/rx5808mod.jpg" width="50%" height="50%" />
+</p>
 
 1. Follow the instructions on the page https://www.arduino.cc/en/Tutorial/ArduinoISP to program the module (select __"Arduino Pro Mini 5v 16MHz"__ as target board)
 using the pins in the upper right corner of the board
 
 2. After the burn of the bootloader, use the FTDI connections in the left side of the board to flash the code present in the Github page of the project
 
-3. The very first time you power on the module, it need to calibrate itself. So please turn on the module with a working Vtx a couple of meter away (the video frequency doesn't matter). This process can take a while (about 30-50 seconds).
+3. When you power on the module, BOTH the leds (upper left corner of the pcb) must be on, and you must see a relatively stable splash screen for about 5 seconds
 
-4. When you power on the module, BOTH the leds (upper left corner of the pcb) must be on, and you must see a relatively stable splash screen for about 5 seconds
+4. The very first time you power on the module, it need to calibrate itself. So please turn on the module with a working Vtx a couple of meter away (the video frequency doesn't matter). This process can take a while (about 30-50 seconds).
 
 5. You can now use the "selection" buttons on the goggles to scroll up/down the menu to select the band
 
@@ -118,6 +121,7 @@ and you should see the splash screen and the menu.
 If you connect the "video in" of the monitor to the test point marked in green, you should see the initial scanning (used to determine the % of the RSSI on each channel), this means a sequence of different "fogs" and (at least) one "good" image (for a fraction of second), if you have a Vtx + cam transmitting. 
 
 __Frequency issues:__
+
 If the module is having trouble Setting Frequency, or you are not getting video when you are 
 on the right channel and frequency, make sure the SPI mod has been done, and that the RX5808 
 is soldered on well. Pretty hard to mess this part up.
