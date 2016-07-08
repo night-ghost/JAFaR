@@ -104,15 +104,6 @@ public:
 	void draw_circle(uint8_t x0, uint8_t y0, uint8_t radius, char c, char fc = -1);
 	void bitmap(uint8_t x, uint8_t y, const unsigned char * bmp, uint16_t i = 0, uint8_t width = 0, uint8_t lines = 0);
 	
-	//hook setup functions
-	void set_vbi_hook(void (*func)());
-	void set_hbi_hook(void (*func)());
-
-	//tone functions
-	void tone(unsigned int frequency, unsigned long duration_ms);
-	void tone(unsigned int frequency);
-	void noTone();
-	
 //The following function definitions can be found in TVoutPrint.cpp
 //printing functions
 	void print_char(uint8_t x, uint8_t y, unsigned char c);

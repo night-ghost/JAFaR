@@ -49,7 +49,7 @@
  */
 char TVout::begin(uint8_t mode) {
 		
-	return begin(mode,128,96);
+	return begin(mode, 128, 96);
 } // end of begin
 
 
@@ -74,19 +74,23 @@ char TVout::begin(uint8_t mode) {
 char TVout::begin(uint8_t mode, uint8_t x, uint8_t y) {
 	
 	// check if x is divisable by 8
-	if ( !(x & 0xF8))
+	if ( !(x & 0xF8)) {
 		return 1;
-	x = x/8;
+	}
+	
+	x = x / 8;
 		
 	screen = (unsigned char*)malloc(x * y * sizeof(unsigned char));
-	if (screen == NULL)
+	if (screen == NULL) {
 		return 4;
+	}
 		
 	cursor_x = 0;
 	cursor_y = 0;
 	
-	render_setup(mode,x,y,screen);
+	render_setup(mode, x, y, screen);
 	clear_screen();
+	
 	return 0;
 } // end of begin
 
@@ -134,7 +138,7 @@ void TVout::fill(uint8_t color) {
  *	The horizonal resolution.
 */
 unsigned char TVout::hres() {
-	return display.hres*8;
+	return display.hres * 8;
 } // end of hres
 
 
@@ -155,7 +159,7 @@ unsigned char TVout::vres() {
  *	Will return -1 for dynamic width fonts as this cannot be determined.
 */
 char TVout::char_line() {
-	return ((display.hres*8)/pgm_read_byte(font));
+	return ((display.hres * 8) / pgm_read_byte(font));
 } // end of char_line
 
 
@@ -172,6 +176,17 @@ void TVout::delay(unsigned int x) {
 } // end of delay
 
 
+/* Get the time in ms since begin was called.
+ * The resolution is 16ms for NTSC and 20ms for PAL
+ *
+ * Returns:
+ *	The time in ms since video generation has started.
+*/
+unsigned long TVout::millis() {
+	return display.frames * _PAL_TIME_SCANLINE * _PAL_LINE_FRAME / 1000;
+} // end of millis
+
+
 /* Delay for x frames, exits at the end of the last display line.
  * delay_frame(1) is useful prior to drawing so there is little/no flicker.
  *
@@ -180,29 +195,13 @@ void TVout::delay(unsigned int x) {
  *		The number of frames to delay for.
  */
 void TVout::delay_frame(unsigned int x) {
-	int stop_line = (int)(display.start_render + (display.vres*(display.vscale_const+1)))+1;
+	int stop_line = (int)(display.first_half_frame_start_render + (display.vres * (display.vscale_const + 1))) + 1;
 	while (x) {
 		while (display.scanLine != stop_line);
 		while (display.scanLine == stop_line);
 		x--;
 	}
 } // end of delay_frame
-
-
-/* Get the time in ms since begin was called.
- * The resolution is 16ms for NTSC and 20ms for PAL
- *
- * Returns:
- *	The time in ms since video generation has started.
-*/
-unsigned long TVout::millis() {
-	if (display.lines_frame == _NTSC_LINE_FRAME) {
-		return display.frames * _NTSC_TIME_SCANLINE * _NTSC_LINE_FRAME / 1000;
-	}
-	else {
-		return display.frames * _PAL_TIME_SCANLINE * _PAL_LINE_FRAME / 1000;
-	}
-} // end of millis
 
 
 /* force the number of times to display each line.
@@ -238,7 +237,10 @@ void TVout::force_outstart(uint8_t time) {
  */
 void TVout::force_linestart(uint8_t line) {
 	delay_frame(1);
-	display.start_render = line;
+	display.first_half_frame_start_render = line;
+	display.first_half_frame_end_render = display.first_half_frame_start_render + (display.vres * (display.vscale_const + 1));
+	display.second_half_frame_start_render = display.lines_frame + display.first_half_frame_start_render;
+	display.second_half_frame_end_render = display.lines_frame + display.first_half_frame_end_render;
 }
 
 
@@ -756,122 +758,3 @@ static void inline sp(uint8_t x, uint8_t y, char c) {
 	else
 		display.screen[(x/8) + (y*display.hres)] ^= 0x80 >> (x&7);
 } // end of sp
-
-
-/* set the vertical blank function call
- * The function passed to this function will be called one per frame. The function should be quickish.
- *
- * Arguments:
- *	func:
- *		The function to call.
- */
-void TVout::set_vbi_hook(void (*func)()) {
-	vbi_hook = func;
-} // end of set_vbi_hook
-
-
-/* set the horizonal blank function call
- * This function passed to this function will be called one per scan line.
- * The function MUST be VERY FAST(~2us max).
- *
- * Arguments:
- *	funct:
- *		The function to call.
- */
-void TVout::set_hbi_hook(void (*func)()) {
-	hbi_hook = func;
-} // end of set_bhi_hook
-
-
-/* Simple tone generation
- *
- * Arguments:
- *	frequency:
- *		the frequency of the tone
- * courtesy of adamwwolf
- */
-void TVout::tone(unsigned int frequency) {
-	tone(frequency, 0);
-} // end of tone
-
-
-/* Simple tone generation
- *
- * Arguments:
- *	frequency:
- *		the frequency of the tone
- *	duration_ms:
- *		The duration to play the tone in ms
- * courtesy of adamwwolf
- */
-void TVout::tone(unsigned int frequency, unsigned long duration_ms) {
-
-	if (frequency == 0)
-		return;
-
-#define TIMER 2
-	//this is init code
-	TCCR2A = 0;
-	TCCR2B = 0;
-	TCCR2A |= _BV(WGM21);
-	TCCR2B |= _BV(CS20);
-	//end init code
-
-	//most of this is taken from Tone.cpp from Arduino
-	uint8_t prescalarbits = 0b001;
-	uint32_t ocr = 0;
-  
-
-    DDR_SND |= _BV(SND_PIN); //set pb3 (digital pin 11) to output
-
-    //we are using an 8 bit timer, scan through prescalars to find the best fit
-	ocr = F_CPU / frequency / 2 - 1;
-    prescalarbits = 0b001;  // ck/1: same for both timers
-    if (ocr > 255) {
-        ocr = F_CPU / frequency / 2 / 8 - 1;
-        prescalarbits = 0b010;  // ck/8: same for both timers
-
-        if (ocr > 255) {
-			ocr = F_CPU / frequency / 2 / 32 - 1;
-			prescalarbits = 0b011;
-        }
-
-        if (ocr > 255) {
-			ocr = F_CPU / frequency / 2 / 64 - 1;
-			prescalarbits = TIMER == 0 ? 0b011 : 0b100;
-			if (ocr > 255) {
-				ocr = F_CPU / frequency / 2 / 128 - 1;
-				prescalarbits = 0b101;
-			}
-
-			if (ocr > 255) {
-				ocr = F_CPU / frequency / 2 / 256 - 1;
-				prescalarbits = TIMER == 0 ? 0b100 : 0b110;
-				if (ocr > 255) {
-					// can't do any better than /1024
-					ocr = F_CPU / frequency / 2 / 1024 - 1;
-					prescalarbits = TIMER == 0 ? 0b101 : 0b111;
-				}
-			}
-        }
-    }
-    TCCR2B = prescalarbits;
-
-	if (duration_ms > 0)
-		remainingToneVsyncs = duration_ms*60/1000; //60 here represents the framerate
-	else
-		remainingToneVsyncs = -1;
- 
-    // Set the OCR for the given timer,
-    OCR2A = ocr;
-    //set it to toggle the pin by itself
-    TCCR2A &= ~(_BV(COM2A1)); //set COM2A1 to 0
-    TCCR2A |= _BV(COM2A0);
-} // end of tone
-
-/* Stops tone generation
- */
-void TVout::noTone() {
-	TCCR2B = 0;
-	PORT_SND &= ~(_BV(SND_PIN)); //set pin 11 to 0
-} // end of noTone
