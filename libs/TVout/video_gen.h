@@ -28,29 +28,32 @@
 
 typedef struct {
 	volatile int scanLine;
+	volatile int vsyncScanLine;
 	volatile unsigned long frames;
-	unsigned char start_render;
-	int lines_frame;	  	//remove me
+	int first_half_frame_start_render;
+	int first_half_frame_end_render;
+	int second_half_frame_start_render;
+	int second_half_frame_end_render;
+	int lines_frame; 		//remove me
 	uint8_t vres;
 	uint8_t hres;
 	uint8_t output_delay; 	//remove me
 	char vscale_const;		//combine me with status switch
 	char vscale;			//combine me too.
-	char vsync_end;			//remove me
 	uint8_t * screen;
 } TVout_vid;
 
 extern TVout_vid display;
 
-extern void (*hbi_hook)();
-extern void (*vbi_hook)();
-
 void render_setup(uint8_t mode, uint8_t x, uint8_t y, uint8_t *scrnptr);
 
-void blank_line();
-void active_line();
-void vsync_line();
-void empty();
+void first_half_frame_vsync_lines();
+void first_half_frame_blank_line();
+void first_half_frame_active_line();
+void second_half_frame_vsync_lines();
+void second_half_frame_blank_line();
+void second_half_frame_active_line();
+void second_half_frame_half_blank_line();
 
 //tone generation properties
 extern volatile long remainingToneVsyncs;
