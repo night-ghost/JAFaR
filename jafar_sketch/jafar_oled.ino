@@ -54,7 +54,6 @@ void oled_splash() {
 
 }
 
-
 void oled_init(void) { // flip screen, if required
   u8g.setRot180();
 
@@ -77,7 +76,6 @@ void oled_init(void) { // flip screen, if required
 
   oled_splash();
 }
-
 
 #define MENU_ITEMS 8
 uint8_t oled_submenu(uint8_t menu_pos, uint8_t band) {

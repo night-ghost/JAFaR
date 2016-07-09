@@ -119,4 +119,23 @@ void osd_scanner() {
   }
   s_timer = 9;
 }
+
+void osd_autoscan() {
+  TV.clear_screen();
+  TV.draw_rect(1, 1, 100, 94,  WHITE);
+
+#ifndef STANDALONE
+  //header and countdown
+  TV.println(92, 3, (int)timer, DEC);
+#endif
+
+  for (uint8_t i = 0; i < 8; i++) {
+    TV.println(10, 3 + i * MENU_Y_SIZE, pgm_read_word_near(channelFreqTable + rx5808.getfrom_top8(i)), DEC); //channel name
+
+    TV.println(65, 3 + i * MENU_Y_SIZE, rx5808.getVal(rx5808.getfrom_top8(i), 100), DEC); //RSSI
+    TV.printPGM(85, 3 + i * MENU_Y_SIZE, PSTR("%"));
+  }
+
+  TV.draw_rect(9, 2 + menu_pos * MENU_Y_SIZE, 90, 7,  WHITE, INVERT); //current selection
+}
 #endif //not USE_OLED

@@ -96,15 +96,34 @@ void setup() {
   last_used_freq = pgm_read_word_near(channelFreqTable + (8 * last_used_band) + last_used_freq_id); //freq
 }
 
-void autoscan() { //TODO BETA VERSION! diversity not supported
-  // RX5808 rx5808B(rssiB, SPI_CSB);
-  // rx5808B.init();
+void autoscan() {
 
-  rx5808.scan(1, BIN_H);
-  uint32_t curr_freq = pgm_read_word_near(channelFreqTable + rx5808.getMaxPos());
-  use_freq(curr_freq, rx5808);
+  timer = TIMER_INIT_VALUE;
+  //rx5808.scan(1, BIN_H); //refresh RSSI
+  rx5808.compute_top8();
 
-  SELECT_A;
+  while (timer) {
+    menu_pos = readSwitch();
+
+#ifdef USE_OLED
+    oled_autoscan();
+#else
+    osd_autoscan();
+#endif
+
+#ifdef USE_OLED  /debounce and peace
+    delay(LOOPTIME);
+#else
+    TV.delay(LOOPTIME);
+#endif //OLED 
+    timer -= (LOOPTIME / 1000.0);
+  }
+
+//menu_pos=0;
+set_and_wait((rx5808.getfrom_top8(menu_pos)&0b11111000)/8, rx5808.getfrom_top8(menu_pos)&0b111);
+  //uint32_t curr_freq = pgm_read_word_near(channelFreqTable + rx5808.getfrom_top8(menu_pos));
+  //SELECT_A;
+  //use_freq(curr_freq, rx5808);
 }
 
 #define RX_A 1
