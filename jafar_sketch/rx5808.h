@@ -23,6 +23,9 @@ This file is part of Fatshark© goggle rx module project (JAFaR).
 #include "Arduino.h"
 #include "const.h"
 
+#define CHANNEL_MAX 40
+#define CHANNEL_MIN 0
+
 //default values used for calibration
 uint16_t rssi_min = 1024;
 uint16_t rssi_max = 0;
@@ -32,6 +35,7 @@ class RX5808
   public:
     RX5808(uint16_t RSSIpin, uint16_t CSpin);
     uint16_t getVal(uint16_t band, uint16_t channel, uint8_t norm);
+    uint16_t getVal(uint16_t pos, uint8_t norm);
     uint16_t getMaxPosBand(uint8_t band);
     uint16_t getMaxValBand(uint8_t band, uint8_t norm);
     uint16_t getMinPosBand(uint8_t band);
@@ -41,10 +45,12 @@ class RX5808
     void init();
     void calibration();
     void setFreq(uint32_t freq);
-    uint16_t getNext(uint16_t channel);
     void abortScan();
+    uint16_t getfrom_top8(uint8_t index);
+    void compute_top8(void);
     uint16_t getRssi(uint16_t channel);
     uint16_t getCurrentRSSI();
+    
   private:
     void _calibrationScan();
     uint16_t _readRSSI();
@@ -53,9 +59,10 @@ class RX5808
     uint16_t _csPin;
     uint8_t _stop_scan;
     uint16_t scanVec[CHANNEL_MAX];
+    uint16_t scanVecTop8[8];
 
     void serialEnable(const uint8_t);
-    void  serialSendBit(const uint8_t);
+    void serialSendBit(const uint8_t);
 
 };
 

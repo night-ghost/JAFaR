@@ -37,7 +37,7 @@ This file is part of Fatshark© goggle rx module project (JAFaR).
 #define LOOPTIME 1000
 #endif
 
-#define TIMER_INIT_VALUE 9.0
+#define TIMER_INIT_VALUE 7.0
 #define CH1 2
 #define CH2 3
 #define CH3 4
@@ -59,9 +59,6 @@ This file is part of Fatshark© goggle rx module project (JAFaR).
 #define D_COL 120
 #define D_ROW 96
 #define MENU_Y_SIZE 12
-
-#define CHANNEL_MAX 40
-#define CHANNEL_MIN 0
 
 //SPI related
 #define spiDataPin 11

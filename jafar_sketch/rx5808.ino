@@ -28,6 +28,32 @@ RX5808::RX5808(uint16_t RSSIpin, uint16_t CSpin) {
   _stop_scan = 0;
 }
 
+uint16_t RX5808::getfrom_top8(uint8_t index) {
+  return scanVecTop8[index];
+}
+
+void RX5808::compute_top8(void) {
+  uint16_t scanVecTmp[CHANNEL_MAX];
+  uint8_t _chan;
+
+  memcpy(scanVecTmp, scanVec, sizeof(uint16_t)*CHANNEL_MAX);
+
+  for (int8_t i = 7; i > 0; i--) {
+
+    uint16_t maxVal = 0, maxPos = 0;
+    for (_chan = CHANNEL_MIN; _chan < CHANNEL_MAX; _chan++) {
+      if (maxVal < scanVecTmp[_chan]) { //new max
+        maxPos = _chan;
+        maxVal = scanVecTmp[_chan];
+      }
+    }
+
+    //maxPos is the maximum
+    scanVecTop8[i] = maxPos;
+    scanVecTmp[maxPos] = 0;
+  }
+}
+
 uint16_t RX5808::getRssi(uint16_t channel) {
   return scanVec[channel];
 }
@@ -36,21 +62,15 @@ uint16_t RX5808::getRssi(uint16_t channel) {
 void RX5808::abortScan(void) {
   _stop_scan = 1;
 }
-//get next strong rssi channel
-uint16_t RX5808::getNext(uint16_t channel) {
-  channel = (channel + 1) % CHANNEL_MAX;
-  for (uint16_t  complete_iter = CHANNEL_MAX - CHANNEL_MIN; complete_iter != 0; complete_iter-- ) {
-    if (scanVec[channel] > RSSI_THRESH) //new over threashold
-      return channel;
-    channel = (channel + 1) % CHANNEL_MAX;
-  }
-
-  return channel;
-}
 
 //get the rssi value of a certain channel of a band and map it to 1...norm
 uint16_t RX5808::getVal(uint16_t band, uint16_t channel, uint8_t norm) {
   return map(scanVec[8 * band + channel], 1, BIN_H, 1, norm);
+}
+
+//get the rssi value of a certain channel and map it to 1...norm
+uint16_t RX5808::getVal(uint16_t pos, uint8_t norm) {
+  return map(scanVec[pos], 1, BIN_H, 1, norm);
 }
 
 //get the maximum rssi value for a certain band and map it to 1...norm
@@ -147,8 +167,6 @@ void RX5808::init() {
   scan(1, BIN_H);
 }
 
-
-
 //do a complete scan and normalize all the values
 void RX5808::scan(uint16_t norm_min, uint16_t norm_max) {
 
@@ -175,8 +193,6 @@ void RX5808::scan(uint16_t norm_min, uint16_t norm_max) {
     rssi = constrain(rssi, rssi_min, rssi_max);
     rssi = map(rssi, rssi_min, rssi_max, norm_min, norm_max);   // scale from 1..100%
     scanVec[_chan] = rssi;
-
-
   }
 }
 
