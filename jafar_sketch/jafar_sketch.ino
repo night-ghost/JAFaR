@@ -122,6 +122,8 @@ void scanner_mode() {
 }
 
 void loop(void) {
+  uint8_t i;
+
   if (do_nothing)
     return;
 
@@ -133,15 +135,19 @@ void loop(void) {
     menu_pos = 0;
 #endif
 
-  uint8_t i;
 
-#ifndef STANDALONE
   if (last_post_switch != menu_pos) {
     flag_first_pos = 0;
     timer = TIMER_INIT_VALUE;
   }
-  else timer -= (LOOPTIME / 1000.0);
+  else {
+#ifdef STANDALONE
+    if (timer > 0)
+      return; //force no refresh of OSD
+#else
+    timer -= (LOOPTIME / 1000.0);
 #endif
+  }
 
   last_post_switch = menu_pos;
 
@@ -157,10 +163,17 @@ void loop(void) {
         autoscan();
         break;
       default:
-        if (in_mainmenu) {
+        if (in_mainmenu) { //switch from menu to submenu (band -> frequency)
           in_mainmenu = 0;
           menu_band = menu_pos - 1;
           timer = TIMER_INIT_VALUE;
+
+#ifdef USE_OLED  /debounce and peace
+          delay(200);
+#else
+          TV.delay(200);
+#endif //OLED 
+
         } else { //after selection of band AND freq by the user
 
           //please wait message
