@@ -20,8 +20,6 @@ This file is part of Fatshark© goggle rx module project (JAFaR).
 #ifndef const_h
 #define const_h
 
-//#define DEBUG
-//#define ENABLE_RSSILOG
 //#define FORCE_FIRST_MENU_ITEM //force always the first menu item (last freq used)
 //#define STANDALONE
 
@@ -29,13 +27,17 @@ This file is part of Fatshark© goggle rx module project (JAFaR).
 #define USE_DIVERSITY
 //#define USE_OLED
 
+//DEBUG STUFF
+//#define DEBUG
+//#define ENABLE_RSSILOG
+
 #ifdef STANDALONE
 #define LOOPTIME 200
 #else
 #define LOOPTIME 1000
 #endif
 
-#define TIMER_INIT_VALUE 3.0
+#define TIMER_INIT_VALUE 9.0
 #define CH1 2
 #define CH2 3
 #define CH3 4

@@ -38,14 +38,6 @@ void osd_init(void) {
 void osd_submenu(int8_t menu_pos, uint8_t band) {
   int i;
   TV.clear_screen();
-
-  //  uint8_t menu_pos;
-  // timer = 9;
-  // while (timer-- > 0) {
-  menu_pos = readSwitch();
-
-  //  if (last_post_switch != menu_pos) { //something changed by user
-  // TV.clear_screen();
   TV.draw_rect(1, 1, 100, 94,  WHITE); //draw frame
 
   //show the channels list and the % RSSI
@@ -56,17 +48,11 @@ void osd_submenu(int8_t menu_pos, uint8_t band) {
     TV.printPGM(78, 3 + i * MENU_Y_SIZE, PSTR("%")); //percentage symbol
   }
 
-
-  last_post_switch = menu_pos;
   TV.draw_rect(9, 2 + menu_pos * MENU_Y_SIZE, 90, 7,  WHITE, INVERT); //current selection
-  //  }
 
+#ifndef STANDALONE
   TV.println(92, 3, (int)timer, DEC);
-
-  //}
-
-
-  //return menu_pos;
+#endif
 
 }
 
@@ -82,8 +68,10 @@ void osd_mainmenu(uint8_t menu_pos) {
   TV.select_font(font6x8);
   TV.draw_rect(1, 1, 100, 94,  WHITE);
 
+#ifndef STANDALONE
   //header and countdown
   TV.println(92, 3, (int)timer, DEC);
+#endif
 
   //last used band,freq
   TV.printPGM(10, 3 , PSTR("LAST:"));

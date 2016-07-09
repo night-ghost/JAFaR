@@ -19,9 +19,9 @@ This file is part of Fatshark© goggle rx module project (JAFaR).
 
 inline uint8_t readSwitch() {
 #ifdef STANDALONE
-  int but_up = digitalRead(CH3);
+  int but_up = digitalRead(CH1);
   int but_ent = digitalRead(CH2);
-  int but_down = digitalRead(CH1);
+  int but_down = digitalRead(CH3);
 
   if (but_up == LOW && menu_pos < 7)
     menu_pos++;
