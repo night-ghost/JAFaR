@@ -168,7 +168,7 @@ void loop(void) {
           menu_band = menu_pos - 1;
           timer = TIMER_INIT_VALUE;
 
-#ifdef USE_OLED  /debounce and peace
+#ifdef USE_OLED  //debounce and peace
           delay(200);
 #else
           TV.delay(200);

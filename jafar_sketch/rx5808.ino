@@ -197,14 +197,16 @@ void RX5808::_wait_rssi() {
   delay(MIN_TUNE_TIME);
 }
 
+//simple avg of 4 value
 uint16_t RX5808::_readRSSI() {
-  uint32_t  sum = 0;
-  for (uint8_t i = 0; i < 10; i++)
-  {
-    sum += analogRead(_rssiPin);
-    delay(2);
-  }
-  return sum / 10; // average
+  volatile uint32_t sum = 0;
+  delay(9);
+  sum = analogRead(_rssiPin);
+  sum += analogRead(_rssiPin);
+  delay(1);
+  sum += analogRead(_rssiPin);
+  sum += analogRead(_rssiPin);
+  return sum / 4.0;
 }
 
 //compute the min and max RSSI value and store the values in EEPROM
