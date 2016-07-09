@@ -113,6 +113,7 @@ void autoscan() {
 #endif
     }
     last_post_switch = menu_pos;
+
 #ifdef USE_OLED  //debounce and peace
     delay(LOOPTIME);
 #else
@@ -121,11 +122,7 @@ void autoscan() {
     timer -= (LOOPTIME / 1000.0);
   }
 
-  //menu_pos=0;
-  set_and_wait((rx5808.getfrom_top8(menu_pos) & 0b11111000) / 8, rx5808.getfrom_top8(menu_pos) & 0b111);
-  //uint32_t curr_freq = pgm_read_word_near(channelFreqTable + rx5808.getfrom_top8(menu_pos));
-  //SELECT_A;
-  //use_freq(curr_freq, rx5808);
+set_and_wait((rx5808.getfrom_top8(menu_pos) & 0b11111000) / 8, rx5808.getfrom_top8(menu_pos) & 0b111);
 }
 
 #define RX_A 1
