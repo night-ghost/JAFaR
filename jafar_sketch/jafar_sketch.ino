@@ -99,7 +99,7 @@ void setup() {
 void autoscan() {
 
   timer = TIMER_INIT_VALUE;
-  //rx5808.scan(1, BIN_H); //refresh RSSI
+  rx5808.scan(1, BIN_H); //refresh RSSI
   rx5808.compute_top8();
 
   while (timer) {
@@ -111,7 +111,7 @@ void autoscan() {
     osd_autoscan();
 #endif
 
-#ifdef USE_OLED  /debounce and peace
+#ifdef USE_OLED  //debounce and peace
     delay(LOOPTIME);
 #else
     TV.delay(LOOPTIME);
@@ -187,7 +187,7 @@ void loop(void) {
           menu_band = menu_pos - 1;
           timer = TIMER_INIT_VALUE;
 
-#ifdef USE_OLED  /debounce and peace
+#ifdef USE_OLED  //debounce and peace
           delay(200);
 #else
           TV.delay(200);

@@ -115,7 +115,7 @@ void osd_scanner() {
     }
 
     TV.println(92, 3, (int)s_timer, DEC);
-    TV.delay(500);
+    TV.delay(100);
   }
   s_timer = 9;
 }
