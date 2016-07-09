@@ -77,35 +77,35 @@ https://docs.google.com/spreadsheets/d/1-763imBV3QsQ71GKDZH-BirTz1k32szNuJZUKQrE
 
 ###DIY Instructions
 
-0. Remove the shield of the RX5808 module and desolder the resistor marked by the arrow. This 
+1. Remove the shield of the RX5808 module and desolder the resistor marked by the arrow. This 
 is the SPI-mod required to control the module with an external microcontroller.
 
 <p align="center">
 <img src="/docs/rx5808mod.jpg" width="35%" height="35%" />
 </p>
 
-1. Follow the instructions on the page https://www.arduino.cc/en/Tutorial/ArduinoISP to burn the bootloader (select __"Arduino Pro Mini 5v 16MHz"__ as target board)
+2. Follow the instructions on the page https://www.arduino.cc/en/Tutorial/ArduinoISP to burn the bootloader (select __"Arduino Pro Mini 5v 16MHz"__ as target board)
 using the pins in the upper right corner of the board
 
-2. Use the FTDI connections in the left side of the board to upload the code present in the 
+3. Use the FTDI connections in the left side of the board to upload the code present in the 
 Github page of the project. Please remember to copy all the subfolders of "libs" dir in the 
 libraries folder of Arduino (e.g. /Arduino/libraries).
 Here you can find more infos and alternative methods to import the libraries: 
 https://www.arduino.cc/en/Guide/Libraries
 
-3. When you power on the module, BOTH the leds (upper left corner of the pcb) must be on, and you must see a relatively stable splash screen for about 5 seconds
+4. When you power on the module, BOTH the leds (upper left corner of the pcb) must be on, and you must see a relatively stable splash screen for about 5 seconds
 
-4. The very first time you power on the module, it need to calibrate itself. So please turn on the module with a working Vtx a couple of meter away (the video frequency doesn't matter). This process can take a while (about 30-50 seconds).
+5. The very first time you power on the module, it need to calibrate itself. So please turn on the module with a working Vtx a couple of meter away (the video frequency doesn't matter). This process can take a while (about 30-50 seconds).
 
-5. You can now use the "selection" buttons on the goggles to scroll up/down the menu to select the band
+6. You can now use the "selection" buttons on the goggles to scroll up/down the menu to select the band
 
-6. After the timout of the countdown (upper left corner of the screen) you entered the frequency selection (of the selected band)
+7. After the timout of the countdown (upper left corner of the screen) you entered the frequency selection (of the selected band)
 
-7. Scroll up/down to select the frequency and wait the timeout
+8. Scroll up/down to select the frequency and wait the timeout
 
-8. At this moment only one led on the module has to be ON, it means that the RX video output is routed to the video_input of the goggles. If you have a Vtx near, you should see the video coming from it. 
+9. At this moment only one led on the module has to be ON, it means that the RX video output is routed to the video_input of the goggles. If you have a Vtx near, you should see the video coming from it. 
 
-9. If you press the "selection" buttons of the goggles now, you change the frequency by the 8 frequencies of the previously selected band.
+10. If you press the "selection" buttons of the goggles now, you change the frequency by the 8 frequencies of the previously selected band.
 
 ###MAIN MODULE Troubleshooting
 
@@ -219,7 +219,7 @@ in the file const.h. You can use the standalone mode either with OSD or with the
 to change band/channel, the connections are the following (every normally-open momentary switch will do the job):
 
 <p align="center">
-<img src="/docs/standalone_connections.jpg" width="50%" height="50%" />
+<img src="/docs/standalone_connections.jpg" width="60%" height="60%" />
 </p>
 
 
@@ -228,7 +228,7 @@ to change band/channel, the connections are the following (every normally-open m
 
 http://www.rcgroups.com/forums/showthread.php?t=2619124 while I'm still writing the readme :)
 
-##FAQ:
+##FAQ
 
 why the OSD is on the blank screen?
 it’s simpler because one cannot have to recognize the vsync and the hsync pulses.
@@ -238,7 +238,7 @@ I need a small 3-way switch, if you have a "simpler" one, just tell me :)
 
 please note that you try and use this project AT YOUR OWN RISK!
 
-##Donations:
+##Donations
 
 Hardware or paypal donations to carry on the project are always accepted.
 
