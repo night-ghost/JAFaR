@@ -200,4 +200,30 @@ void oled_scanner() {
   }
 }
 
+void oled_autoscan() {
+
+  U8GLIB_SSD1306_128X64 u8g2(8, A1, A4, 11 , 13); //CLK, MOSI, CS, DC, RESET
+  u8g2.setRot180();
+  u8g2.setFont(u8g_font_6x10);
+
+  u8g2.firstPage();
+  do {
+    for (int i = 0; i < MENU_ITEMS; i++) {
+      u8g2.setDefaultForegroundColor();
+      if (i == menu_pos) {
+
+        u8g2.drawBox(0, 1 + menu_pos * 8, 127, 7);
+        u8g2.setDefaultBackgroundColor();
+      }
+
+      sprintf (j_buf, "%d   %x   %d ", pgm_read_word_near(channelFreqTable + rx5808.getfrom_top8(i)), pgm_read_byte_near(channelNames + rx5808.getfrom_top8(i)), rx5808.getVal(rx5808.getfrom_top8(i), 100));
+      u8g2.drawStr( 0, 8 + i * 8, j_buf);
+    }
+#ifndef STANDALONE
+    u8g2.setPrintPos(110, 10);
+    u8g2.print((int)timer);
+#endif
+
+  } while ( u8g2.nextPage() );
+}
 #endif //OLED

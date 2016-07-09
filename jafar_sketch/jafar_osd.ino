@@ -130,8 +130,8 @@ void osd_autoscan() {
 #endif
 
   for (uint8_t i = 0; i < 8; i++) {
-    TV.println(10, 3 + i * MENU_Y_SIZE, pgm_read_word_near(channelFreqTable + rx5808.getfrom_top8(i)), DEC); //channel name
-
+    TV.println(10, 3 + i * MENU_Y_SIZE, pgm_read_word_near(channelFreqTable + rx5808.getfrom_top8(i)), DEC); //channel freq
+    TV.println(45, 3 + i * MENU_Y_SIZE , pgm_read_byte_near(channelNames + rx5808.getfrom_top8(i)), HEX); //channel name
     TV.println(65, 3 + i * MENU_Y_SIZE, rx5808.getVal(rx5808.getfrom_top8(i), 100), DEC); //RSSI
     TV.printPGM(85, 3 + i * MENU_Y_SIZE, PSTR("%"));
   }

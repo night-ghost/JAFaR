@@ -97,7 +97,7 @@ void setup() {
 }
 
 void autoscan() {
-
+  last_post_switch = -1; //force first draw
   timer = TIMER_INIT_VALUE;
   rx5808.scan(1, BIN_H); //refresh RSSI
   rx5808.compute_top8();
@@ -105,12 +105,14 @@ void autoscan() {
   while (timer) {
     menu_pos = readSwitch();
 
+    if (menu_pos != last_post_switch) {
 #ifdef USE_OLED
-    oled_autoscan();
+      oled_autoscan();
 #else
-    osd_autoscan();
+      osd_autoscan();
 #endif
-
+    }
+    last_post_switch = menu_pos;
 #ifdef USE_OLED  //debounce and peace
     delay(LOOPTIME);
 #else
@@ -119,8 +121,8 @@ void autoscan() {
     timer -= (LOOPTIME / 1000.0);
   }
 
-//menu_pos=0;
-set_and_wait((rx5808.getfrom_top8(menu_pos)&0b11111000)/8, rx5808.getfrom_top8(menu_pos)&0b111);
+  //menu_pos=0;
+  set_and_wait((rx5808.getfrom_top8(menu_pos) & 0b11111000) / 8, rx5808.getfrom_top8(menu_pos) & 0b111);
   //uint32_t curr_freq = pgm_read_word_near(channelFreqTable + rx5808.getfrom_top8(menu_pos));
   //SELECT_A;
   //use_freq(curr_freq, rx5808);
