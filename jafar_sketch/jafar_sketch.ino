@@ -170,18 +170,19 @@ void loop(void) {
   last_post_switch = menu_pos;
 
   if (timer <= 0) { //end of time for selection
-    switch (menu_pos) {
-      case 0: //LAST USED
-        set_and_wait(last_used_band, last_used_freq_id);
-        break;
-      case 6: //SCANNER
-        scanner_mode();
-        break;
-      case 7: //AUTOSCAN
-        autoscan();
-        break;
-      default:
-        if (in_mainmenu) { //switch from menu to submenu (band -> frequency)
+
+    if (in_mainmenu) { //switch from menu to submenu (band -> frequency)
+      switch (menu_pos) {
+        case 0: //LAST USED
+          set_and_wait(last_used_band, last_used_freq_id);
+          break;
+        case 6: //SCANNER
+          scanner_mode();
+          break;
+        case 7: //AUTOSCAN
+          autoscan();
+          break;
+        default:
           in_mainmenu = 0;
           menu_band = menu_pos - 1;
           timer = TIMER_INIT_VALUE;
@@ -191,26 +192,27 @@ void loop(void) {
 #else
           TV.delay(200);
 #endif //OLED 
+          break;
+      } //switch
+    } else { //if in submenu
 
-        } else { //after selection of band AND freq by the user
-
-          //please wait message
 #ifdef USE_DIVERSITY
 #ifdef USE_OLED
-          oled_waitmessage();
-          delay(800);
+      oled_waitmessage(); //please wait message
+      delay(800);
 #else
-          osd_waitmessage() ;
-          TV.delay(800);
+      osd_waitmessage() ;
+      TV.delay(100);
 #endif //OLED 
 #endif //DIVERSITY
-          set_and_wait(menu_band, menu_pos);
-          timer = 0;
-        }
-        break;
-    }
-  }
 
+      //after selection of band AND freq by the user
+      set_and_wait(menu_band, menu_pos);
+      timer = 0;
+    } //else
+  } //timer
+
+  //time still running
   if (in_mainmenu) { //on main menu
 #ifdef USE_OLED
     oled_mainmenu(menu_pos);
