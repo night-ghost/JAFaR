@@ -98,7 +98,7 @@ void osd_mainmenu(uint8_t menu_pos) {
 }
 
 void osd_scanner() {
-  uint8_t s_timer = 9;
+  uint8_t s_timer = 5;
   while (s_timer-- > 0) {
     rx5808.scan(1, BIN_H);
     TV.clear_screen();
