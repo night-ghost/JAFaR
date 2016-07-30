@@ -50,7 +50,7 @@ class RX5808
     void compute_top8(void);
     uint16_t getRssi(uint16_t channel);
     uint16_t getCurrentRSSI();
-    
+
   private:
     void _calibrationScan();
     uint16_t _readRSSI();

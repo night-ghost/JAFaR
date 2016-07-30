@@ -94,6 +94,12 @@ uint8_t oled_submenu(uint8_t menu_pos, uint8_t band) {
       }
 
       sprintf (j_buf, "%d     %d", pgm_read_word_near(channelFreqTable + (8 * band) + i), rx5808.getVal(band, i, 100));
+
+#ifndef STANDALONE
+      if (i == 0)
+        sprintf (j_buf, "%s   %d ", j_buf, (int)timer); //timer on the first line
+#endif
+
       u8g.drawStr( 0, 8 + i * 8, j_buf);
     }
 #ifndef STANDALONE
@@ -121,13 +127,16 @@ void oled_mainmenu(uint8_t menu_pos) {
 
     for (i = 0; i < MENU_ITEMS; i++) {
       u8g.setDefaultForegroundColor();
-      if (i == menu_pos) { //selection
+      
+      if (i == menu_pos) { //current selection
         u8g.drawBox(0, 1 + menu_pos * 8, 127, 7);
         u8g.setDefaultBackgroundColor();
       }
-      u8g.drawStr( 0, 8 + i * 8, menu_strings[i]);
-      u8g.setPrintPos(80, 8 + i * 8); //RSSI value  (only for the "real" bands
-      if (i > 0 && i < 6)
+      
+      u8g.drawStr( 0, 8 + i * 8, menu_strings[i]); //menu item
+      
+      u8g.setPrintPos(80, 8 + i * 8); //RSSI value  
+      if (i > 0 && i < 6) //only for the "real" bands (no for scanner, autoscan etc)
         u8g.print(rx5808.getMaxValBand(i - 1, 100));
     }
 
@@ -200,30 +209,35 @@ void oled_scanner() {
   }
 }
 
-void oled_autoscan() {
+void oled_autoscan(uint8_t reinit) {
 
-  U8GLIB_SSD1306_128X64 u8g2(8, A1, A4, 11 , 13); //CLK, MOSI, CS, DC, RESET
-  u8g2.setRot180();
-  u8g2.setFont(u8g_font_6x10);
+  if (reinit) {
+    U8GLIB_SSD1306_128X64 u8g(8, A1, A4, 11 , 13); //CLK, MOSI, CS, DC, RESET
+    u8g.setRot180();
+    u8g.setFont(u8g_font_6x10);
+  }
 
-  u8g2.firstPage();
+  u8g.firstPage();
   do {
     for (int i = 0; i < MENU_ITEMS; i++) {
-      u8g2.setDefaultForegroundColor();
+      u8g.setDefaultForegroundColor();
       if (i == menu_pos) {
 
-        u8g2.drawBox(0, 1 + menu_pos * 8, 127, 7);
-        u8g2.setDefaultBackgroundColor();
+        u8g.drawBox(0, 1 + menu_pos * 8, 127, 7);
+        u8g.setDefaultBackgroundColor();
       }
 
       sprintf (j_buf, "%d   %x   %d ", pgm_read_word_near(channelFreqTable + rx5808.getfrom_top8(i)), pgm_read_byte_near(channelNames + rx5808.getfrom_top8(i)), rx5808.getVal(rx5808.getfrom_top8(i), 100));
-      u8g2.drawStr( 0, 8 + i * 8, j_buf);
-    }
+
 #ifndef STANDALONE
-    u8g2.setPrintPos(110, 10);
-    u8g2.print((int)timer);
+      if (i == 0)
+        sprintf (j_buf, "%s   %d ", j_buf, (int)timer); //timer on the first line
 #endif
 
-  } while ( u8g2.nextPage() );
+      u8g.drawStr( 0, 8 + i * 8, j_buf);
+    }
+
+
+  } while ( u8g.nextPage() );
 }
 #endif //OLED

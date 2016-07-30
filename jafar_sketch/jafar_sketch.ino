@@ -97,6 +97,7 @@ void setup() {
 }
 
 void autoscan() {
+  int reinit = 1; //only the first time, re-init the oled
   last_post_switch = -1; //force first draw
   timer = TIMER_INIT_VALUE;
   rx5808.scan(1, BIN_H); //refresh RSSI
@@ -105,13 +106,16 @@ void autoscan() {
   while (timer) {
     menu_pos = readSwitch();
 
-    if (menu_pos != last_post_switch) {
+    if (menu_pos != last_post_switch)  //user moving
+      timer = TIMER_INIT_VALUE;
+
 #ifdef USE_OLED
-      oled_autoscan();
+    oled_autoscan(reinit);
+    reinit = 0;
 #else
-      osd_autoscan();
+    osd_autoscan();
 #endif
-    }
+
     last_post_switch = menu_pos;
 
 #ifdef USE_OLED  //debounce and peace
@@ -122,7 +126,7 @@ void autoscan() {
     timer -= (LOOPTIME / 1000.0);
   }
 
-set_and_wait((rx5808.getfrom_top8(menu_pos) & 0b11111000) / 8, rx5808.getfrom_top8(menu_pos) & 0b111);
+  set_and_wait((rx5808.getfrom_top8(menu_pos) & 0b11111000) / 8, rx5808.getfrom_top8(menu_pos) & 0b111);
 }
 
 #define RX_A 1

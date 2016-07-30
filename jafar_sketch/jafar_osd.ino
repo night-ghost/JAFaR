@@ -126,7 +126,7 @@ void osd_autoscan() {
 
 #ifndef STANDALONE
   //header and countdown
-  TV.println(92, 3, (int)timer, DEC);
+  TV.println(92, 3, (int)timer, DEC); //timer
 #endif
 
   for (uint8_t i = 0; i < 8; i++) {
