@@ -55,8 +55,9 @@ void oled_splash() {
 }
 
 void oled_init(void) { // flip screen, if required
+#ifdef FLIP_SCREEN
   u8g.setRot180();
-
+#endif
   // set SPI backup if required
   //u8g.setHardwareBackup(u8g_backup_avr_spi);
 
@@ -127,15 +128,15 @@ void oled_mainmenu(uint8_t menu_pos) {
 
     for (i = 0; i < MENU_ITEMS; i++) {
       u8g.setDefaultForegroundColor();
-      
+
       if (i == menu_pos) { //current selection
         u8g.drawBox(0, 1 + menu_pos * 8, 127, 7);
         u8g.setDefaultBackgroundColor();
       }
-      
+
       u8g.drawStr( 0, 8 + i * 8, menu_strings[i]); //menu item
-      
-      u8g.setPrintPos(80, 8 + i * 8); //RSSI value  
+
+      u8g.setPrintPos(80, 8 + i * 8); //RSSI value
       if (i > 0 && i < 6) //only for the "real" bands (no for scanner, autoscan etc)
         u8g.print(rx5808.getMaxValBand(i - 1, 100));
     }

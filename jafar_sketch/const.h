@@ -30,6 +30,7 @@ This file is part of Fatshark© goggle rx module project (JAFaR).
 //DEBUG STUFF
 //#define DEBUG
 //#define ENABLE_RSSILOG
+#define FLIP_SCREEN
 
 #ifdef STANDALONE
 #define LOOPTIME 200
