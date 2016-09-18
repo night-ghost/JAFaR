@@ -27,6 +27,8 @@ This file is part of Fatshark© goggle rx module project (JAFaR).
 #define USE_DIVERSITY
 //#define USE_OLED
 
+//#define USE_I2C_OLED
+
 //DEBUG STUFF
 //#define DEBUG
 //#define ENABLE_RSSILOG

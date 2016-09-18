@@ -35,7 +35,12 @@ uint8_t menu_pos;
 
 #include "U8glib.h"
 
+#ifdef USE_I2C_OLED
+U8GLIB_SSD1306_128X64 u8g(U8G_I2C_OPT_DEV_0 | U8G_I2C_OPT_NO_ACK | U8G_I2C_OPT_FAST); // Fast I2C / TWI
+#else
 U8GLIB_SSD1306_128X64 u8g(8, A1, A4, 11 , 13); //CLK, MOSI, CS, DC, RESET
+#endif
+
 char j_buf[80];
 
 #else //USE OSD
