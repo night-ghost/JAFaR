@@ -1,3 +1,7 @@
+.pioenvs
+.clang_complete
+.gcc-flags.json
+.piolibdeps
 # OS generated files #
 ######################
 .DS_Store
@@ -9,8 +13,6 @@ ehthumbs.db
 Thumbs.db
 *~
 *.attr
-
-
 # Compiled source #
 ###################
 *.com
@@ -19,9 +21,7 @@ Thumbs.db
 *.exe
 *.o
 *.so
-
 # Eagle lock #
-###################
 *.lck
 *.b#*
 *.s#*
