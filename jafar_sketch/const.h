@@ -24,23 +24,18 @@ This file is part of Fatshark© goggle rx module project (JAFaR).
 //#define STANDALONE
 
 //ONLY ONE OF THE FOLLOWING:
-#define USE_DIVERSITY
+//#define USE_DIVERSITY
 //#define USE_OLED
+
+#define USE_I2C_OLED
 
 //#define USE_I2C_OLED
 
 //DEBUG STUFF
 //#define DEBUG
 //#define ENABLE_RSSILOG
-#define FLIP_SCREEN
+//#define FLIP_SCREEN
 
-#ifdef STANDALONE
-#define LOOPTIME 200
-#else
-#define LOOPTIME 1000
-#endif
-
-#define TIMER_INIT_VALUE 5.0
 #define CH1 2
 #define CH2 3
 #define CH3 4
@@ -51,14 +46,13 @@ This file is part of Fatshark© goggle rx module project (JAFaR).
 #define EEPROM_ADR_RSSI_MAX_L 4
 #define EEPROM_ADR_RSSI_MAX_H 5
 
-#define EEPROM_ADDR_LAST_BAND_ID 15
-#define EEPROM_ADDR_LAST_FREQ_ID 16
+#define EEPROM_ADDR_LAST_CHAN_ID 8
 
 #define EEPROM_ADDR_START_LOG 20
 
 #define BIN_H 70
 
-//diplay dependant
+//OSD diplay dependant
 #define D_COL 120
 #define D_ROW 96
 #define MENU_Y_SIZE 12
@@ -81,6 +75,9 @@ This file is part of Fatshark© goggle rx module project (JAFaR).
 #define SELECT_B {digitalWrite(SW_CTRL1, HIGH);  digitalWrite(SW_CTRL2, LOW);}
 
 #define RX_HYST 15 //~10%
+
+#define RX_A 1
+#define RX_B 0
 
 // Channels with their Mhz Values
 const uint16_t channelFreqTable[] PROGMEM = {

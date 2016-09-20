@@ -42,31 +42,48 @@ inline uint8_t readSwitch() {
 void use_freq_diversity(uint32_t freq, RX5808 rx5808, RX5808 rx5808B) {
   rx5808.setFreq(freq);
   rx5808B.setFreq(freq);
-
-  do_nothing = 1;
 }
 #endif
 
 void use_freq(uint32_t freq, RX5808 rx5808) {
   rx5808.setFreq(freq);
-  do_nothing = 1;
 }
 
-void set_and_wait(uint8_t band, uint8_t menu_pos) {
+void select_freq(uint8_t band, uint8_t freq_id) {
+  rx5808.setFreq(pgm_read_word_near(channelFreqTable + (8 * menu_band) + freq_id));
+}
+
+#if 0
+uint8_t set_and_wait(int band_sel, uint8_t menu_pos) {
   unsigned rssi_b, rssi_a;
   u8 current_rx;
+  uint8_t band;
+  uint8_t freq;
 
+  static int settime = millis();
+
+  if (band_sel == -1) {
+    band = rx5808.getfrom_top8(menu_pos) >> 3;
+    freq = rx5808.getfrom_top8(menu_pos) & 7;
+  } else {
+    band = band_sel;
+    freq = menu_pos;
+  }
+
+#ifdef USE_OLED
+  oled_submenu(freq, band);
+#endif
 
 #ifdef USE_DIVERSITY
   //init of the second module
   RX5808 rx5808B(rssiB, SPI_CSB);
   rx5808B.init();
-  use_freq_diversity(pgm_read_word_near(channelFreqTable + (8 * band) + menu_pos), rx5808, rx5808B); //set the selected freq
+  use_freq_diversity(pgm_read_word_near(channelFreqTable + (8 * band) + freq), rx5808, rx5808B); //set the selected freq
   SELECT_B;
 
   current_rx = RX_B;
 #else
-  use_freq(pgm_read_word_near(channelFreqTable + (8 * band) + menu_pos), rx5808); //set the selected freq
+  use_freq(pgm_read_word_near(channelFreqTable + (8 * band) + freq), rx5808); //set the selected freq
   SELECT_A;
   current_rx = RX_A;
 #endif
@@ -82,7 +99,7 @@ void set_and_wait(uint8_t band, uint8_t menu_pos) {
 #endif
 
   //save band and freq as "last used"
-  EEPROM.write(EEPROM_ADDR_LAST_FREQ_ID, menu_pos); //freq id
+  EEPROM.write(EEPROM_ADDR_LAST_FREQ_ID, freq); //freq id
   EEPROM.write(EEPROM_ADDR_LAST_BAND_ID, band); //channel name
 
   /*
@@ -102,6 +119,9 @@ void set_and_wait(uint8_t band, uint8_t menu_pos) {
     } while ( u8g2.nextPage() );
     delay(4000);
   */
+
+  //timer = 0;
+  uint8_t last_pos = menu_pos;
 
   //MAIN LOOP - change channel and log
   while (1) {
@@ -159,16 +179,36 @@ void set_and_wait(uint8_t band, uint8_t menu_pos) {
 
     menu_pos = readSwitch();
 
-    if (last_post_switch != menu_pos) { //something changed by user
+    if (last_pos != menu_pos) { //something changed by user
+//      if (band_sel == -1 || timer > 0) {
+//        return menu_pos;
+//      }
+      //timer = 1.0;
+      freq = menu_pos;
+
 #ifdef USE_DIVERSITY
-      use_freq_diversity(pgm_read_word_near(channelFreqTable + (8 * band) + menu_pos), rx5808, rx5808B); //set the selected freq
+      use_freq_diversity(pgm_read_word_near(channelFreqTable + (8 * band) + freq), rx5808, rx5808B); //set the selected freq
 #else
-      use_freq(pgm_read_word_near(channelFreqTable + (8 * band) + menu_pos), rx5808); //set the selected freq
+      use_freq(pgm_read_word_near(channelFreqTable + (8 * band) + freq), rx5808); //set the selected freq
 #endif
       EEPROM.write(EEPROM_ADDR_LAST_FREQ_ID, menu_pos);
+#ifdef USE_OLED
+      // we should show the selected channel in big letters :-)
+      oled_submenu(freq, band);
+#endif
     }
-    last_post_switch = menu_pos;
+    last_pos = menu_pos;
+
+    //timer -= LOOPTIME / 1000.0;
+    //if (timer < 0) timer = 0.0;
+#ifdef USE_OLED  //debounce and peace
+    delay(LOOPTIME);
+#else
+    TV.delay(LOOPTIME);
+#endif //OLED
 
   } //end of loop
 
 }
+
+#endif

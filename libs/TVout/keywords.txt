@@ -16,10 +16,6 @@ clear_screen	KEYWORD2
 invert	KEYWORD2
 
 begin	KEYWORD2
-end	KEYWORD2
-force_vscale KEYWORD2
-force_outstart	KEYWORD2
-force_linestart	KEYWORD2
 hres	KEYWORD2
 vres	KEYWORD2
 char_line	KEYWORD2
@@ -32,8 +28,7 @@ get_pixel	KEYWORD2
 fill	KEYWORD2
 shift	KEYWORD2
 draw_line	KEYWORD2
-draw_row	KEYWORD2
-draw_column	KEYWORD2
+fill_line	KEYWORD2
 draw_rect	KEYWORD2
 draw_circle	KEYWORD2
 bitmap	KEYWORD2

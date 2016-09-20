@@ -28,7 +28,7 @@ RX5808::RX5808(uint16_t RSSIpin, uint16_t CSpin) {
   _stop_scan = 0;
 }
 
-uint16_t RX5808::getfrom_top8(uint8_t index) {
+uint8_t RX5808::getfrom_top8(uint8_t index) {
   return scanVecTop8[index];
 }
 
@@ -38,9 +38,9 @@ void RX5808::compute_top8(void) {
 
   memcpy(scanVecTmp, scanVec, sizeof(uint16_t)*CHANNEL_MAX);
 
-  for (int8_t i = 7; i > 0; i--) {
-
-    uint16_t maxVal = 0, maxPos = 0;
+  for (int8_t i = 7; i >= 0; i--) {
+    uint16_t maxVal = 0;
+    uint8_t maxPos = 0;
     for (_chan = CHANNEL_MIN; _chan < CHANNEL_MAX; _chan++) {
       if (maxVal < scanVecTmp[_chan]) { //new max
         maxPos = _chan;
@@ -64,22 +64,21 @@ void RX5808::abortScan(void) {
 }
 
 //get the rssi value of a certain channel of a band and map it to 1...norm
-uint16_t RX5808::getVal(uint16_t band, uint16_t channel, uint8_t norm) {
+uint16_t RX5808::getVal(uint8_t band, uint8_t channel, uint8_t norm) {
   return map(scanVec[8 * band + channel], 1, BIN_H, 1, norm);
 }
 
 //get the rssi value of a certain channel and map it to 1...norm
-uint16_t RX5808::getVal(uint16_t pos, uint8_t norm) {
+uint16_t RX5808::getVal(uint8_t pos, uint8_t norm) {
   return map(scanVec[pos], 1, BIN_H, 1, norm);
 }
 
 //get the maximum rssi value for a certain band and map it to 1...norm
 uint16_t RX5808::getMaxValBand(uint8_t band, uint8_t norm) {
-  uint16_t _chan;
-  uint16_t maxVal = 0, maxPos = 8 * band;
+  int16_t _chan;
+  uint16_t maxVal = 0;
   for (_chan = 8 * band; _chan < 8 * band + 8; _chan++) {
     if (maxVal < scanVec[_chan]) { //new max
-      maxPos = _chan;
       maxVal = scanVec[_chan];
     }
   }
@@ -88,13 +87,12 @@ uint16_t RX5808::getMaxValBand(uint8_t band, uint8_t norm) {
 
 //get the channel with max rssi value for a certain band
 uint16_t RX5808::getMaxPosBand(uint8_t band) {
-  uint16_t _chan;
+  int16_t _chan;
   uint16_t maxVal = 0, maxPos = 8 * band;
   for (_chan = 8 * band; _chan < 8 * band + 8; _chan++) {
     if (maxVal < scanVec[_chan]) { //new max
       maxPos = _chan;
       maxVal = scanVec[_chan];
-
     }
   }
   return maxPos;
@@ -102,13 +100,12 @@ uint16_t RX5808::getMaxPosBand(uint8_t band) {
 
 //get the minimum rssi value for a certain band
 uint16_t RX5808::getMinPosBand(uint8_t band) {
-  uint16_t _chan;
+  int16_t _chan;
   uint16_t minVal = 1000, minPos = 8 * band;
   for (_chan = 8 * band; _chan < 8 * band + 8; _chan++) {
     if (minVal > scanVec[_chan]) { //new max
       minPos = _chan;
       minVal = scanVec[_chan];
-
     }
   }
   return minPos;
@@ -122,7 +119,6 @@ uint16_t RX5808::getMaxPos() {
     if (maxVal < scanVec[_chan]) { //new max
       maxPos = _chan;
       maxVal = scanVec[_chan];
-
     }
   }
   return maxPos;
@@ -136,7 +132,6 @@ uint16_t RX5808::getMinPos() {
     if (minVal > scanVec[_chan]) { //new max
       minPos = _chan;
       minVal = scanVec[_chan];
-
     }
   }
   return minPos;
@@ -347,6 +342,7 @@ void RX5808::serialSendBit(const uint8_t _b) {
   digitalWrite(spiClockPin, LOW);
   delayMicroseconds(1);
 }
+
 void RX5808::serialEnable(const uint8_t _lev) {
   delayMicroseconds(1);
   digitalWrite(_csPin, _lev);

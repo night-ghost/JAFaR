@@ -25,23 +25,37 @@ This file is part of Fatshark© goggle rx module project (JAFaR).
 #include "const.h"
 
 RX5808 rx5808(rssiA, SPI_CSA);
+RX5808 rx5808B(rssiB, SPI_CSB);
 
-uint8_t last_post_switch, do_nothing, flag_first_pos,  in_mainmenu, menu_band;
-float timer;
-uint16_t last_used_freq, last_used_band, last_used_freq_id;
+volatile int counter;
+volatile bool buttonPressed;
+volatile bool timerExpired;
+
+uint8_t flag_first_pos, menu_band;
+uint8_t last_used_chans[8];
+uint8_t prev_last_used_chans[8];
 uint8_t menu_pos;
+bool saved;
+
+enum modes {
+  MAINMENU,
+  SCANNER,
+  LASTUSED,
+  BANDMENU,
+  AUTOSCAN
+} mode;
+
+char j_buf[40];
 
 #ifdef USE_OLED
 
 #include "U8glib.h"
 
 #ifdef USE_I2C_OLED
-U8GLIB_SSD1306_128X64 u8g(U8G_I2C_OPT_DEV_0 | U8G_I2C_OPT_NO_ACK | U8G_I2C_OPT_FAST); // Fast I2C / TWI
+U8GLIB_SSD1306_128X64 u8g(U8G_I2C_OPT_DEV_0|U8G_I2C_OPT_NO_ACK|U8G_I2C_OPT_FAST);
 #else
 U8GLIB_SSD1306_128X64 u8g(8, A1, A4, 11 , 13); //CLK, MOSI, CS, DC, RESET
 #endif
-
-char j_buf[80];
 
 #else //USE OSD
 
@@ -74,169 +88,237 @@ void setup() {
   pinMode(spiDataPin, OUTPUT);
   pinMode(spiClockPin, OUTPUT);
 
+  display_init();
+
   //RX module init
   rx5808.init();
+  rx5808B.init();
   //rx5808.calibration();
 
-#ifdef USE_OLED
-  oled_init();
-#else
-  osd_init();
-#endif
+  display_splash_rssi();
 
   flag_first_pos = 0;
 #ifdef FORCE_FIRST_MENU_ITEM
   flag_first_pos = readSwitch();
-  last_post_switch = 0;
-#else
-  last_post_switch = -1; //init menu position
-#endif
-  do_nothing = 0;
-
-  in_mainmenu = 1;
-  timer = TIMER_INIT_VALUE;
-
-  last_used_band = EEPROM.read(EEPROM_ADDR_LAST_BAND_ID); //channel name
-  last_used_freq_id = EEPROM.read(EEPROM_ADDR_LAST_FREQ_ID);
-  last_used_freq = pgm_read_word_near(channelFreqTable + (8 * last_used_band) + last_used_freq_id); //freq
-}
-
-void autoscan() {
-  int reinit = 1; //only the first time, re-init the oled
-  last_post_switch = -1; //force first draw
-  timer = TIMER_INIT_VALUE;
-  rx5808.scan(1, BIN_H); //refresh RSSI
-  rx5808.compute_top8();
-
-  while (timer) {
-    menu_pos = readSwitch();
-
-    if (menu_pos != last_post_switch)  //user moving
-      timer = TIMER_INIT_VALUE;
-
-#ifdef USE_OLED
-    oled_autoscan(reinit);
-    reinit = 0;
-#else
-    osd_autoscan();
 #endif
 
-    last_post_switch = menu_pos;
-
-#ifdef USE_OLED  //debounce and peace
-    delay(LOOPTIME);
-#else
-    TV.delay(LOOPTIME);
-#endif //OLED 
-    timer -= (LOOPTIME / 1000.0);
+  for(int i=0 ; i<8 ; i++) {
+    last_used_chans[i] = EEPROM.read(EEPROM_ADDR_LAST_CHAN_ID + i);
   }
 
-  set_and_wait((rx5808.getfrom_top8(menu_pos) & 0b11111000) / 8, rx5808.getfrom_top8(menu_pos) & 0b111);
+  buttonPressed = false;
+  pciSetup(2);
+  pciSetup(3);
+  pciSetup(4);
+
+  menu_pos = readSwitch();
+  mode = MAINMENU;
+  counter = 500;
+
+  saved = false;
+
+  display_mainmenu(menu_pos);
+
+  cli();
+  //set timer2 interrupt at ~100Hz
+  TCCR2A = 0;// set entire TCCR2A register to 0
+  TCCR2B = 0;// same for TCCR2B
+  TCNT2  = 0;//initialize counter value to 0
+  // set compare match register for ~100Hz increments
+  OCR2A = 155;// = (16*10^6) / (100*1024) - 1 (must be <256)
+  // turn on CTC mode
+  TCCR2A |= (1 << WGM21);
+  // Set CS20 & CS22 bit for 1024 prescaler
+  TCCR2B |= (1 << CS20) | (1 << CS21) | (1 << CS22);
+  // enable timer compare interrupt
+  TIMSK2 |= (1 << OCIE2A);
+  timerExpired = false;
+  sei();
 }
 
-#define RX_A 1
-#define RX_B 0
+void pciSetup(byte pin) {
+  *digitalPinToPCMSK(pin) |= bit (digitalPinToPCMSKbit(pin));  // enable pin
+  PCIFR  |= bit (digitalPinToPCICRbit(pin)); // clear any outstanding interrupt
+  PCICR  |= bit (digitalPinToPCICRbit(pin)); // enable interrupt for the group
+}
 
-void scanner_mode() {
+ISR(PCINT2_vect) {
+  buttonPressed = true;
+}
 
-#ifdef USE_OLED
-  oled_scanner();
-#else
-  osd_scanner();
-#endif
+void processButton() {
+  SELECT_OSD;
+  menu_pos = readSwitch();
+  saved = false;
+  switch (mode) {
+    case MAINMENU:
+      // a key was pressed so we do nothing
+      break;
 
-  timer = TIMER_INIT_VALUE;
+    case SCANNER:
+      // we hit a key in scanner mode so go back to mainmenu
+      rx5808.scan(1, BIN_H); //refresh RSSI
+      mode = MAINMENU;
+      break;
+
+    case LASTUSED:
+      cancelOrSelect(last_used_chans[menu_pos] / 8, last_used_chans[menu_pos] % 8);
+      break;
+
+    case BANDMENU:
+      cancelOrSelect(menu_band, menu_pos);
+      break;
+
+    case AUTOSCAN:
+      cancelOrSelect(rx5808.getfrom_top8(menu_pos) / 8, rx5808.getfrom_top8(menu_pos) % 8);
+      break;
+  }
+  counter = 500;
+}
+
+void cancelOrSelect(uint8_t band, uint8_t freq) {
+  // if we get a keypress in under 1 second then exit to mainmenu
+  if (counter > 400) {
+    rx5808.scan(1, BIN_H); //refresh RSSI
+    mode = MAINMENU;
+  } else {
+    select_freq(band, freq);
+  }
+}
+
+ISR(TIMER2_COMPA_vect) {
+  if (!timerExpired) {
+    timerExpired = (--counter == 0);
+  }
+}
+
+void processTimer() {
+  // select option and enter
+  switch(mode) {
+    case MAINMENU:
+      switch (menu_pos) {
+        case 0: //LAST USED
+          if (last_used_chans[0] < 40) {
+            select_freq(last_used_chans[0] / 8, last_used_chans[0] % 8);
+            memcpy(prev_last_used_chans, last_used_chans, 8);
+            mode = LASTUSED;
+          } else {
+            rx5808.scan(1, BIN_H); //refresh RSSI
+          }
+          counter = 500;
+          break;
+
+        case 6: //SCANNER
+          rx5808.scan(1, BIN_H); //refresh RSSI
+          mode = SCANNER;
+          counter = 500;
+          break;
+
+        case 7: //AUTOSCAN
+          rx5808.scan(1, BIN_H); //refresh RSSI
+          rx5808.compute_top8();
+          mode = AUTOSCAN;
+          counter = 500;
+          break;
+
+        default:
+          menu_band = menu_pos-1;
+          select_freq(menu_band, menu_pos);
+          mode = BANDMENU;
+          counter = 500;
+          break;
+      }
+      break;
+
+    case SCANNER:
+      rx5808.scan(1, BIN_H); //refresh RSSI
+      counter = 500;
+      break;
+
+    case LASTUSED:
+      if (!saved) {
+        updateLastUsed(last_used_chans[menu_pos] / 8, last_used_chans[menu_pos] % 8);
+        SELECT_A;
+        saved = true;
+      }
+      counter = 300;
+      break;
+
+    case BANDMENU:
+    case AUTOSCAN:
+      if (!saved) {
+        updateLastUsed(menu_band, menu_pos);
+        SELECT_A;
+        saved = true;
+      }
+      counter = 300;
+      break;
+  }
+}
+
+void updateLastUsed(uint8_t band, uint8_t chan) {
+  uint8_t last_used = (band * 8) + chan;
+  int pos = 7;
+  for(int i=0 ; i<8 ; i++) {
+    if (last_used_chans[i] == last_used) {
+      pos = i;
+      break;
+    }
+  }
+  memmove(last_used_chans+1, last_used_chans, pos);
+  last_used_chans[0] = last_used;
+  for(int i=0 ; i<8 ; i++) {
+    EEPROM.write(EEPROM_ADDR_LAST_CHAN_ID, last_used_chans[i]);
+  }
+}
+
+void redisplay() {
+  switch(mode) {
+    case MAINMENU:
+      display_mainmenu(menu_pos);
+      break;
+
+    case LASTUSED:
+      display_favorites();
+      break;
+
+    case SCANNER:
+      display_scanner();
+      break;
+
+    case BANDMENU:
+      display_bandmenu(menu_pos, menu_band);
+      break;
+
+    case AUTOSCAN:
+      display_autoscan();
+      break;
+  }
 }
 
 void loop(void) {
-  uint8_t i;
-
-  if (do_nothing)
-    return;
-
-  menu_pos = readSwitch();
-
-  //force always the first menu item (last freq used)
-#ifdef FORCE_FIRST_MENU_ITEM
-  if (flag_first_pos == menu_pos)
-    menu_pos = 0;
-#endif
-
-
-  if (last_post_switch != menu_pos) {
-    flag_first_pos = 0;
-    timer = TIMER_INIT_VALUE;
-  }
-  else {
-#ifdef STANDALONE
-    if (timer > 0)
-      return; //force no refresh of OSD
-#else
-    timer -= (LOOPTIME / 1000.0);
-#endif
-  }
-
-  last_post_switch = menu_pos;
-
-  if (timer <= 0) { //end of time for selection
-
-    if (in_mainmenu) { //switch from menu to submenu (band -> frequency)
-      switch (menu_pos) {
-        case 0: //LAST USED
-          set_and_wait(last_used_band, last_used_freq_id);
-          break;
-        case 6: //SCANNER
-          scanner_mode();
-          break;
-        case 7: //AUTOSCAN
-          autoscan();
-          break;
-        default:
-          in_mainmenu = 0;
-          menu_band = menu_pos - 1;
-          timer = TIMER_INIT_VALUE;
-
-#ifdef USE_OLED  //debounce and peace
-          delay(200);
-#else
-          TV.delay(200);
-#endif //OLED 
-          break;
-      } //switch
-    } else { //if in submenu
-
-#ifdef USE_DIVERSITY
 #ifdef USE_OLED
-      oled_waitmessage(); //please wait message
-      delay(800);
+  delay(50);
 #else
-      osd_waitmessage() ;
-      TV.delay(100);
-#endif //OLED 
-#endif //DIVERSITY
-
-      //after selection of band AND freq by the user
-      set_and_wait(menu_band, menu_pos);
-      timer = 0;
-    } //else
-  } //timer
-
-  //time still running
-  if (in_mainmenu) { //on main menu
-#ifdef USE_OLED
-    oled_mainmenu(menu_pos);
-    delay(LOOPTIME);
-#else
-    osd_mainmenu(menu_pos) ;
-    TV.delay(LOOPTIME);
+  TV.delay(50);
 #endif
-  } else { //on submenu
-#ifdef USE_OLED
-    oled_submenu(menu_pos,  menu_band);
-    delay(LOOPTIME);
-#else
-    osd_submenu(menu_pos,  menu_band);
-    TV.delay(LOOPTIME);
-#endif
+  if (buttonPressed) {
+    processButton();
+    buttonPressed = false;
+    redisplay();
+  } else if (timerExpired) {
+    processTimer();
+    timerExpired = false;
+    redisplay();
+  } else {
+    update_timer_display();
   }
+}
+
+void update_timer_display() {
+#ifdef USE_OLED
+  redisplay();
+#else
+  display_timer();
+#endif
 }
