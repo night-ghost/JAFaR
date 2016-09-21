@@ -60,7 +60,7 @@ U8GLIB_SSD1306_128X64 u8g(8, A1, A4, 11 , 13); //CLK, MOSI, CS, DC, RESET
 #else //USE OSD
 
 #include <TVout.h>
-#include <fontALL.h>
+#include <TVoutfonts/fontALL.h>
 
 TVout TV;
 
