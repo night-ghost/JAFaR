@@ -25,16 +25,20 @@ This file is part of Fatshark© goggle rx module project (JAFaR).
 #include "const.h"
 
 RX5808 rx5808(rssiA, SPI_CSA);
+#ifdef USE_DIVERSITY
 RX5808 rx5808B(rssiB, SPI_CSB);
+#endif
 
 volatile int counter;
 volatile bool buttonPressed;
 volatile bool timerExpired;
 
-uint8_t flag_first_pos, menu_band;
+uint8_t flag_first_pos, menu_band, current_rx;
 uint8_t last_used_chans[8];
 uint8_t prev_last_used_chans[8];
 uint8_t menu_pos;
+int16_t chan_scan;
+
 bool saved;
 
 enum modes {
@@ -92,10 +96,14 @@ void setup() {
 
   //RX module init
   rx5808.init();
+#ifdef USE_DIVERSITY
   rx5808B.init();
+#endif
   //rx5808.calibration();
 
   display_splash_rssi();
+
+  chan_scan = 0;
 
   flag_first_pos = 0;
 #ifdef FORCE_FIRST_MENU_ITEM
@@ -146,6 +154,21 @@ ISR(PCINT2_vect) {
   buttonPressed = true;
 }
 
+ISR(TIMER2_COMPA_vect) {
+  if (!timerExpired) {
+    timerExpired = (--counter == 0);
+  }
+}
+
+void select_freq(uint8_t channel) {
+  uint16_t freq = pgm_read_word_near(channelFreqTable + channel);
+  rx5808.setFreq(freq);
+#ifdef USE_DIVERSITY
+  rx5808B.setFreq(freq);
+#endif
+  chan_scan = -1;
+}
+
 void processButton() {
   SELECT_OSD;
   menu_pos = readSwitch();
@@ -157,38 +180,30 @@ void processButton() {
 
     case SCANNER:
       // we hit a key in scanner mode so go back to mainmenu
-      rx5808.scan(1, BIN_H); //refresh RSSI
       mode = MAINMENU;
       break;
 
     case LASTUSED:
-      cancelOrSelect(last_used_chans[menu_pos] / 8, last_used_chans[menu_pos] % 8);
+      cancelOrSelect(prev_last_used_chans[menu_pos]);
       break;
 
     case BANDMENU:
-      cancelOrSelect(menu_band, menu_pos);
+      cancelOrSelect(menu_band * 8 + menu_pos);
       break;
 
     case AUTOSCAN:
-      cancelOrSelect(rx5808.getfrom_top8(menu_pos) / 8, rx5808.getfrom_top8(menu_pos) % 8);
+      cancelOrSelect(rx5808.getfrom_top8(menu_pos));
       break;
   }
   counter = 500;
 }
 
-void cancelOrSelect(uint8_t band, uint8_t freq) {
+void cancelOrSelect(uint8_t channel) {
   // if we get a keypress in under 1 second then exit to mainmenu
   if (counter > 400) {
-    rx5808.scan(1, BIN_H); //refresh RSSI
     mode = MAINMENU;
   } else {
-    select_freq(band, freq);
-  }
-}
-
-ISR(TIMER2_COMPA_vect) {
-  if (!timerExpired) {
-    timerExpired = (--counter == 0);
+    select_freq(channel);
   }
 }
 
@@ -199,45 +214,41 @@ void processTimer() {
       switch (menu_pos) {
         case 0: //LAST USED
           if (last_used_chans[0] < 40) {
-            select_freq(last_used_chans[0] / 8, last_used_chans[0] % 8);
-            memcpy(prev_last_used_chans, last_used_chans, 8);
             mode = LASTUSED;
-          } else {
-            rx5808.scan(1, BIN_H); //refresh RSSI
+            select_freq(last_used_chans[0]);
+            memcpy(prev_last_used_chans, last_used_chans, 8);
           }
           counter = 500;
           break;
 
         case 6: //SCANNER
-          rx5808.scan(1, BIN_H); //refresh RSSI
           mode = SCANNER;
           counter = 500;
           break;
 
         case 7: //AUTOSCAN
-          rx5808.scan(1, BIN_H); //refresh RSSI
           rx5808.compute_top8();
           mode = AUTOSCAN;
+          select_freq(rx5808.getfrom_top8(7));
           counter = 500;
           break;
 
         default:
           menu_band = menu_pos-1;
-          select_freq(menu_band, menu_pos);
           mode = BANDMENU;
+          select_freq(menu_band * 8 + menu_pos);
           counter = 500;
           break;
       }
       break;
 
     case SCANNER:
-      rx5808.scan(1, BIN_H); //refresh RSSI
       counter = 500;
       break;
 
     case LASTUSED:
       if (!saved) {
-        updateLastUsed(last_used_chans[menu_pos] / 8, last_used_chans[menu_pos] % 8);
+        updateLastUsed(prev_last_used_chans[menu_pos]);
         SELECT_A;
         saved = true;
       }
@@ -245,9 +256,17 @@ void processTimer() {
       break;
 
     case BANDMENU:
+      if (!saved) {
+        updateLastUsed(menu_band * 8 + menu_pos);
+        SELECT_A;
+        saved = true;
+      }
+      counter = 300;
+      break;
+
     case AUTOSCAN:
       if (!saved) {
-        updateLastUsed(menu_band, menu_pos);
+        updateLastUsed(rx5808.getfrom_top8(menu_pos));
         SELECT_A;
         saved = true;
       }
@@ -256,17 +275,16 @@ void processTimer() {
   }
 }
 
-void updateLastUsed(uint8_t band, uint8_t chan) {
-  uint8_t last_used = (band * 8) + chan;
+void updateLastUsed(uint8_t channel) {
   int pos = 7;
   for(int i=0 ; i<8 ; i++) {
-    if (last_used_chans[i] == last_used) {
+    if (last_used_chans[i] == channel) {
       pos = i;
       break;
     }
   }
   memmove(last_used_chans+1, last_used_chans, pos);
-  last_used_chans[0] = last_used;
+  last_used_chans[0] = channel;
   for(int i=0 ; i<8 ; i++) {
     EEPROM.write(EEPROM_ADDR_LAST_CHAN_ID, last_used_chans[i]);
   }
@@ -297,11 +315,40 @@ void redisplay() {
 }
 
 void loop(void) {
-#ifdef USE_OLED
-  delay(50);
-#else
-  TV.delay(50);
+  if (mode == MAINMENU || mode == SCANNER) {
+    if (chan_scan != -1) {
+      rx5808.updateRssi(1, BIN_H, chan_scan);
+      if (mode == SCANNER) {
+        display_scanner_update(chan_scan);
+      }
+      chan_scan = (chan_scan + 1) % CHANNEL_MAX;
+    } else {
+      chan_scan = 0;
+    }
+    rx5808.setFreq(pgm_read_word_near(channelFreqTable + chan_scan));
+  } else {
+
+#ifdef USE_DIVERSITY
+    // select best reciever
+    uint16_t rssi_a = rx5808.getCurrentRSSI();
+    uint16_t rssi_b = rx5808B.getCurrentRSSI();
+    if (current_rx == RX_B && rssi_a > rssi_b + RX_HYST) {
+      SELECT_A;
+      current_rx = RX_A;
+    }
+    if (current_rx == RX_A && rssi_b > rssi_a + RX_HYST) {
+      SELECT_B;
+      current_rx = RX_B;
+    }
 #endif
+  }
+
+#ifdef USE_OLED
+  delay(30);
+#else
+  TV.delay(40);
+#endif
+
   if (buttonPressed) {
     processButton();
     buttonPressed = false;
@@ -311,14 +358,12 @@ void loop(void) {
     timerExpired = false;
     redisplay();
   } else {
-    update_timer_display();
-  }
-}
-
-void update_timer_display() {
+    if (mode != SCANNER) {
 #ifdef USE_OLED
-  redisplay();
+      redisplay();
 #else
-  display_timer();
+      display_timer();
 #endif
+    }
+  }
 }

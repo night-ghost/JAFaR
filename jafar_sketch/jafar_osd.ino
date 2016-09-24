@@ -62,9 +62,9 @@ void display_mainmenu(uint8_t menu_pos) {
 
   //last used band,freq
   if (last_used_chans[0]<40) {
-    sprintf (j_buf, "Favorites: %X %d", pgm_read_byte_near(channelNames + last_used_chans[0]), pgm_read_word_near(channelFreqTable + last_used_chans[0]));
+    sprintf (j_buf, "FAVORITES %X %d", pgm_read_byte_near(channelNames + last_used_chans[0]), pgm_read_word_near(channelFreqTable + last_used_chans[0]));
   } else {
-    sprintf (j_buf, "Favorites: -- ----");
+    sprintf (j_buf, "FAVORITES -- ----");
   }
   TV.println(3, 3 , j_buf);
 
@@ -98,6 +98,12 @@ void display_scanner() {
       uint8_t channelIndex = pgm_read_byte_near(channelList + i); //retrive the value based on the freq order
       TV.draw_rect(10 + 2 * i, 10 + BIN_H - rx5808.getRssi(channelIndex) , 2, rx5808.getRssi(channelIndex), WHITE, WHITE);
     }
+}
+
+void display_scanner_update(int16_t channel) {
+  uint8_t channelIndex = pgm_read_byte_near(channelList + channel); //retrive the value based on the freq order
+  TV.draw_rect(10 + 2 * channel, 10 , 2, BIN_H, BLACK, BLACK);
+  TV.draw_rect(10 + 2 * channel, 10 + BIN_H - rx5808.getRssi(channelIndex) , 2, rx5808.getRssi(channelIndex), WHITE, WHITE);
 }
 
 void display_bandmenu(uint8_t menu_pos, uint8_t band) {

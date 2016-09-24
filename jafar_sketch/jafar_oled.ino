@@ -93,9 +93,9 @@ void display_mainmenu(uint8_t menu_pos) {
   u8g.setFont(u8g_font_6x10);
 
   if (last_used_chans[0]<40) {
-    sprintf (j_buf, "Favorites:   %X %d", pgm_read_byte_near(channelNames + last_used_chans[0]), pgm_read_word_near(channelFreqTable + last_used_chans[0]));
+    sprintf (j_buf, "FAVORITES   %X %d", pgm_read_byte_near(channelNames + last_used_chans[0]), pgm_read_word_near(channelFreqTable + last_used_chans[0]));
   } else {
-    sprintf (j_buf, "Favorites:   -- ----");
+    sprintf (j_buf, "FAVORITES   -- ----");
   }
   char *menu_strings[MENU_ITEMS] {j_buf, "BAND A", "BAND B", "BAND E", "BAND FATSHARK", "RACEBAND", "SCANNER", "AUTOSCAN"};
 
@@ -180,6 +180,10 @@ void display_scanner() {
     if (height > 0)
       u8g.drawBox(124,64-height,4,height);
   } while ( u8g.nextPage() );
+}
+
+void display_scanner_update(int16_t channel) {
+  // wait for 5 seconds then update the screen
 }
 
 void display_bandmenu(uint8_t menu_pos, uint8_t band) {

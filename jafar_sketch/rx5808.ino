@@ -191,6 +191,13 @@ void RX5808::scan(uint16_t norm_min, uint16_t norm_max) {
   }
 }
 
+void RX5808::updateRssi(uint16_t norm_min, uint16_t norm_max, uint16_t channel) {
+  uint16_t rssi =  _readRSSI();
+  rssi = constrain(rssi, rssi_min, rssi_max);
+  rssi = map(rssi, rssi_min, rssi_max, norm_min, norm_max);   // scale from 1..100%
+  scanVec[channel] = rssi;
+}
+
 //same as scan, but raw values, used for calibration
 void RX5808::_calibrationScan() {
   for (uint16_t _chan = CHANNEL_MIN; _chan < CHANNEL_MAX; _chan++) {
