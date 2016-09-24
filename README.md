@@ -2,7 +2,18 @@
 
 DIY OpenSource 40ch receiver OSD integrated
 
-The aim of the project is to build an opensource 40ch receiver for Fatshark goggles which has to be easy to develop, 
+## This is a major refactor of MikyM0use's original code
+
+**Changes**
+* Has a favorites section which remembers the last 8 channels used ordered with the last used at the top of the list. It re-orders the list when you select a new channel.
+* The scanner is continuously running in the main menu or scanner menu. This means that the RSSI values are pretty much always up to date.
+* There's a timer progress bar on the right rather than a counter.
+* Double-click (i.e. another press within 1 second) takes you back to the main menu.
+* When in a band selection menu, favorites or autoscan a single click of the buttons selects the next or previous channel respectively.
+
+## MikyM0use's original README follows
+
+The aim of the project is to build an opensource 40ch receiver for Fatshark goggles which has to be easy to develop,
 upgrade and maintain. And, of course, it must be cheap!
 <p align="center">
 <img src="/docs/diversity_goggles.jpg" width="50%" height="50%" />
