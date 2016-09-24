@@ -63,7 +63,7 @@ class RX5808
     uint8_t scanVecTop8[8];
 
     void serialEnable(const uint8_t);
-    void serialSendBit(const uint8_t);
+    void sendCommand(const uint8_t, const uint8_t, uint32_t);
 
 };
 

@@ -145,6 +145,16 @@ void RX5808::init() {
   pinMode (_csPin, OUTPUT);
   pinMode (_rssiPin, INPUT);
 
+  /*
+   * Hardware SPI
+   * - SPI Enable
+   * - LSB first
+   * - Master mode
+   * - Leading edge rising, Leading edge sample
+   * - SCK = 0 = fosc/4 i.e. 4Mhz
+   */
+  SPCR=(1<<SPE)|(1<<DORD)|(1<<MSTR);
+
   rssi_min = ((EEPROM.read(EEPROM_ADR_RSSI_MIN_H) << 8) | (EEPROM.read(EEPROM_ADR_RSSI_MIN_L)));
   rssi_max = ((EEPROM.read(EEPROM_ADR_RSSI_MAX_H) << 8) | (EEPROM.read(EEPROM_ADR_RSSI_MAX_L)));
 
@@ -264,14 +274,11 @@ void RX5808::calibration() {
 }
 
 void RX5808::setFreq(uint32_t freq) {
-  uint8_t i;
-  uint16_t channelData;
-
   uint32_t _if = (freq - 479);
 
   uint32_t N = floor(_if / 64);
   uint32_t A = floor((_if / 2) % 32);
-  channelData = (N << 7) | (A & 0x7F);
+  uint32_t channelData = (N << 7) | (A & 0x7F);
 
 #ifdef DEBUG
   Serial.print("N: ");
@@ -288,70 +295,26 @@ void RX5808::setFreq(uint32_t freq) {
   delayMicroseconds(1);
   serialEnable(LOW);
 
-  //REGISTER 1 - selection
-  // bit bash out 25 bits of data
-  // Order: A0-3, !R/W, D0-D19
-  // A0=0, A1=0, A2=0, A3=1, RW=0, D0-19=0
-  uint16_t reg1 = 0x10;
-  for (i = 0; i < 25; i++)
-    serialSendBit((reg1 >> i) & 1);
+  sendCommand(8, 0, 0);
 
-  // Clock the data in
   serialEnable(HIGH);
   delayMicroseconds(1);
   serialEnable(LOW);
 
-  // Second is the channel data from the lookup table
-  // 20 bytes of register data are sent, but the MSB 4 bits are zeros
-  // register address = 0x1, write, data0-15=channelData data15-19=0x0
+  sendCommand(1, 1, channelData);
+
   serialEnable(HIGH);
-  serialEnable(LOW);
-
-  // Register 0x1
-  serialSendBit(HIGH);
-  serialSendBit(LOW);
-  serialSendBit(LOW);
-  serialSendBit(LOW);
-
-  // Write to register
-  serialSendBit(HIGH);
-
-  // D0-D15
-  //   note: loop runs backwards as more efficent on AVR
-  for (i = 16; i > 0; i--) {
-    serialSendBit(channelData & 0x1);
-    // Shift bits along to check the next one
-    channelData >>= 1;
-  }
-
-  // Remaining D16-D19
-  for (i = 4; i > 0; i--)
-    serialSendBit(LOW);
-
-  // Finished clocking data in
-  serialEnable(HIGH);
-  delayMicroseconds(1);
-
-  //  digitalWrite(_csPin, LOW);
-  digitalWrite(spiClockPin, LOW);
-  digitalWrite(spiDataPin, LOW);
 }
 
-void RX5808::serialSendBit(const uint8_t _b) {
-  digitalWrite(spiClockPin, LOW);
-  delayMicroseconds(1);
-
-  digitalWrite(spiDataPin, _b);
-  delayMicroseconds(1);
-  digitalWrite(spiClockPin, HIGH);
-  delayMicroseconds(1);
-
-  digitalWrite(spiClockPin, LOW);
-  delayMicroseconds(1);
+void RX5808::sendCommand(uint8_t addr, uint8_t readwrite, uint32_t data) {
+  uint32_t spiData = (data << 5) | ((readwrite & 1) << 4) | (addr & 0xF);
+  for(int i=0 ; i<4 ; i++) {
+    SPDR = spiData & 0xFF;
+    spiData >>= 8;
+    while(!(SPSR & (1<<SPIF) ));
+  }
 }
 
 void RX5808::serialEnable(const uint8_t _lev) {
-  delayMicroseconds(1);
   digitalWrite(_csPin, _lev);
-  delayMicroseconds(1);
 }
