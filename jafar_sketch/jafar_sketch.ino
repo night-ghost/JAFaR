@@ -155,7 +155,7 @@ ISR(PCINT2_vect) {
 }
 
 ISR(TIMER2_COMPA_vect) {
-  if (!timerExpired) {
+  if (!timerExpired && counter) {
     timerExpired = (--counter == 0);
   }
 }
@@ -247,12 +247,13 @@ void processTimer() {
       break;
 
     case LASTUSED:
-      if (!saved) {
-        updateLastUsed(prev_last_used_chans[menu_pos]);
-        SELECT_A;
-        saved = true;
+      if (prev_last_used_chans[menu_pos]>=CHANNEL_MIN && prev_last_used_chans[menu_pos]<CHANNEL_MAX) {
+        if (!saved) {
+          updateLastUsed(prev_last_used_chans[menu_pos]);
+          SELECT_A;
+          saved = true;
+        }
       }
-      counter = 300;
       break;
 
     case BANDMENU:
@@ -261,7 +262,6 @@ void processTimer() {
         SELECT_A;
         saved = true;
       }
-      counter = 300;
       break;
 
     case AUTOSCAN:
@@ -270,7 +270,6 @@ void processTimer() {
         SELECT_A;
         saved = true;
       }
-      counter = 300;
       break;
   }
 }

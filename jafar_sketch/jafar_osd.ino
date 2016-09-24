@@ -143,6 +143,8 @@ void display_favorites() {
   TV.draw_rect(0, 0, D_COL, D_ROW, WHITE);
 
   for (uint8_t i = 0; i < 8; i++) {
+    if (prev_last_used_chans[i]<0 || prev_last_used_chans[i]>40)
+      break;
     TV.println(10, 3 + i * MENU_Y_SIZE, pgm_read_word_near(channelFreqTable + prev_last_used_chans[i]), DEC); //channel freq
     TV.println(45, 3 + i * MENU_Y_SIZE , pgm_read_byte_near(channelNames + prev_last_used_chans[i]), HEX); //channel name
     TV.println(65, 3 + i * MENU_Y_SIZE, rx5808.getVal(prev_last_used_chans[i], 100), DEC); //RSSI
