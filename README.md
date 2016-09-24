@@ -11,6 +11,8 @@ DIY OpenSource 40ch receiver OSD integrated
 * Double-click (i.e. another press within 1 second) takes you back to the main menu.
 * When in a band selection menu, favorites or autoscan a single click of the buttons selects the next or previous channel respectively.
 
+Make sure to use the updated TVout library from https://github.com/pkendall64/arduino-tvout as the original will cancel timer 2, which is the selection timer for this version of the receiver.
+
 ## MikyM0use's original README follows
 
 The aim of the project is to build an opensource 40ch receiver for Fatshark goggles which has to be easy to develop,
