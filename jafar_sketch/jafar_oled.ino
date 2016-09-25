@@ -189,18 +189,18 @@ void display_scanner_update(int16_t channel) {
 void display_bandmenu(uint8_t menu_pos, uint8_t band) {
   uint8_t chans[8];
   for(int i=0;i<8;i++) chans[i] = band*8+i;
-  display_group(chans);
+  display_group(menu_pos, chans);
 }
 
 void display_autoscan(uint8_t menu_pos) {
-  display_group(rx5808.getTop8());
+  display_group(menu_pos, rx5808.getTop8());
 }
 
 void display_favorites(uint8_t menu_pos) {
-  display_group(prev_last_used_chans);
+  display_group(menu_pos, prev_last_used_chans);
 }
 
-void display_group(uint8_t *group) {
+void display_group(uint8_t menu_pos, uint8_t *group) {
   int band = group[menu_pos] / 8;
   int chan = group[menu_pos] % 8;
 

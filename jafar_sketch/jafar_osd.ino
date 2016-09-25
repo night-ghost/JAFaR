@@ -106,38 +106,22 @@ void display_scanner_update(int16_t channel) {
   TV.draw_rect(10 + 2 * channel, 10 + BIN_H - rx5808.getRssi(channelIndex) , 2, rx5808.getRssi(channelIndex), WHITE, WHITE);
 }
 
+
 void display_bandmenu(uint8_t menu_pos, uint8_t band) {
-  int i;
-  TV.clear_screen();
-  TV.select_font(font6x8);
-  TV.draw_rect(0, 0, D_COL, D_ROW, WHITE);
-
-  for (i = 0; i < 8; i++) {
-    TV.println(10, 3 + i * MENU_Y_SIZE, pgm_read_word_near(channelFreqTable + (8 * band) + i), DEC); //channel name
-
-    TV.println(60, 3 + i * MENU_Y_SIZE, rx5808.getVal(band, i, 100), DEC); //RSSI
-    TV.printPGM(78, 3 + i * MENU_Y_SIZE, PSTR("%")); //percentage symbol
-  }
-
-  TV.draw_rect(2, 2 + menu_pos * MENU_Y_SIZE, D_COL-10, 8, WHITE, INVERT); //current selection
+  uint8_t chans[8];
+  for(int i=0;i<8;i++) chans[i] = band*8+i;
+  display_group(menu_pos, chans);
 }
 
 void display_autoscan(uint8_t menu_pos) {
-  TV.clear_screen();
-  TV.select_font(font6x8);
-  TV.draw_rect(0, 0, D_COL, D_ROW, WHITE);
-
-  for (uint8_t i = 0; i < 8; i++) {
-    TV.println(10, 3 + i * MENU_Y_SIZE, pgm_read_word_near(channelFreqTable + rx5808.getfrom_top8(i)), DEC); //channel freq
-    TV.println(45, 3 + i * MENU_Y_SIZE , pgm_read_byte_near(channelNames + rx5808.getfrom_top8(i)), HEX); //channel name
-    TV.println(65, 3 + i * MENU_Y_SIZE, rx5808.getVal(rx5808.getfrom_top8(i), 100), DEC); //RSSI
-    TV.printPGM(85, 3 + i * MENU_Y_SIZE, PSTR("%"));
-  }
-
-  TV.draw_rect(2, 2 + menu_pos * MENU_Y_SIZE, D_COL-10, 8, WHITE, INVERT); //current selection
+  display_group(menu_pos, rx5808.getTop8());
 }
 
 void display_favorites(uint8_t menu_pos) {
+  display_group(menu_pos, prev_last_used_chans);
+}
+
+void display_group(uint8_t menu_pos, uint8_t *group) {
   TV.clear_screen();
   TV.select_font(font6x8);
   TV.draw_rect(0, 0, D_COL, D_ROW, WHITE);
@@ -145,9 +129,9 @@ void display_favorites(uint8_t menu_pos) {
   for (uint8_t i = 0; i < 8; i++) {
     if (prev_last_used_chans[i]<0 || prev_last_used_chans[i]>40)
       break;
-    TV.println(10, 3 + i * MENU_Y_SIZE, pgm_read_word_near(channelFreqTable + prev_last_used_chans[i]), DEC); //channel freq
-    TV.println(45, 3 + i * MENU_Y_SIZE , pgm_read_byte_near(channelNames + prev_last_used_chans[i]), HEX); //channel name
-    TV.println(65, 3 + i * MENU_Y_SIZE, rx5808.getVal(prev_last_used_chans[i], 100), DEC); //RSSI
+    TV.println(10, 3 + i * MENU_Y_SIZE, pgm_read_word_near(channelFreqTable + group[i]), DEC); //channel freq
+    TV.println(45, 3 + i * MENU_Y_SIZE , pgm_read_byte_near(channelNames + group[i]), HEX); //channel name
+    TV.println(65, 3 + i * MENU_Y_SIZE, rx5808.getVal(group[i], 100), DEC); //RSSI
     TV.printPGM(85, 3 + i * MENU_Y_SIZE, PSTR("%"));
   }
 
