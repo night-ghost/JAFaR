@@ -46,10 +46,12 @@ class RX5808
     void calibration();
     void setFreq(uint32_t freq);
     void abortScan();
+    uint8_t* getTop8();
     uint8_t getfrom_top8(uint8_t index);
     void compute_top8(void);
     void updateRssi(uint16_t norm_min, uint16_t norm_max, uint16_t channel);
     uint16_t getRssi(uint16_t channel);
+    uint16_t getCurrentRSSI(uint16_t norm_min, uint16_t norm_max);
     uint16_t getCurrentRSSI();
 
   private:

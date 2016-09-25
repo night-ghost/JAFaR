@@ -24,12 +24,10 @@ This file is part of Fatshark© goggle rx module project (JAFaR).
 //#define STANDALONE
 
 //ONLY ONE OF THE FOLLOWING:
-//#define USE_DIVERSITY
-//#define USE_OLED
+#define USE_DIVERSITY
+#define USE_OLED
 
 #define USE_I2C_OLED
-
-//#define USE_I2C_OLED
 
 //DEBUG STUFF
 //#define DEBUG

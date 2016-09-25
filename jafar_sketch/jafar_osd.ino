@@ -122,7 +122,7 @@ void display_bandmenu(uint8_t menu_pos, uint8_t band) {
   TV.draw_rect(2, 2 + menu_pos * MENU_Y_SIZE, D_COL-10, 8, WHITE, INVERT); //current selection
 }
 
-void display_autoscan() {
+void display_autoscan(uint8_t menu_pos) {
   TV.clear_screen();
   TV.select_font(font6x8);
   TV.draw_rect(0, 0, D_COL, D_ROW, WHITE);
@@ -137,7 +137,7 @@ void display_autoscan() {
   TV.draw_rect(2, 2 + menu_pos * MENU_Y_SIZE, D_COL-10, 8, WHITE, INVERT); //current selection
 }
 
-void display_favorites() {
+void display_favorites(uint8_t menu_pos) {
   TV.clear_screen();
   TV.select_font(font6x8);
   TV.draw_rect(0, 0, D_COL, D_ROW, WHITE);

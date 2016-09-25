@@ -32,6 +32,10 @@ uint8_t RX5808::getfrom_top8(uint8_t index) {
   return scanVecTop8[index];
 }
 
+uint8_t* RX5808::getTop8() {
+  return scanVecTop8;
+}
+
 void RX5808::compute_top8(void) {
   uint16_t scanVecTmp[CHANNEL_MAX];
   uint8_t _chan;
@@ -135,6 +139,13 @@ uint16_t RX5808::getMinPos() {
     }
   }
   return minPos;
+}
+
+uint16_t RX5808::getCurrentRSSI(uint16_t norm_min, uint16_t norm_max) {
+  uint16_t rssi =  _readRSSI();
+  rssi = constrain(rssi, rssi_min, rssi_max);
+  rssi = map(rssi, rssi_min, rssi_max, norm_min, norm_max);   // scale from 1..100%
+  return rssi;
 }
 
 uint16_t RX5808::getCurrentRSSI() {

@@ -296,7 +296,7 @@ void redisplay() {
       break;
 
     case LASTUSED:
-      display_favorites();
+      display_favorites(menu_pos);
       break;
 
     case SCANNER:
@@ -308,7 +308,7 @@ void redisplay() {
       break;
 
     case AUTOSCAN:
-      display_autoscan();
+      display_autoscan(menu_pos);
       break;
   }
 }

@@ -97,7 +97,7 @@ void display_mainmenu(uint8_t menu_pos) {
   } else {
     sprintf (j_buf, "FAVORITES   -- ----");
   }
-  char *menu_strings[MENU_ITEMS] {j_buf, "BAND A", "BAND B", "BAND E", "BAND FATSHARK", "RACEBAND", "SCANNER", "AUTOSCAN"};
+  const char *menu_strings[MENU_ITEMS] {j_buf, "BAND A", "BAND B", "BAND E", "BAND FATSHARK", "RACEBAND", "SCANNER", "AUTOSCAN"};
 
   u8g.firstPage();
   do {
@@ -187,82 +187,53 @@ void display_scanner_update(int16_t channel) {
 }
 
 void display_bandmenu(uint8_t menu_pos, uint8_t band) {
-  u8g.setFont(u8g_font_6x10);
-  u8g.firstPage();
-  do {
-    u8g.setDefaultForegroundColor();
-    u8g.drawXBMP( 0, 0, 32, 32, bands[band]);
-    u8g.drawXBMP( 32-7, 0, 32, 32, channels[menu_pos]);
-
-    for (int i = 0; i < MENU_ITEMS; i++) {
-      u8g.setDefaultForegroundColor();
-      if (i == menu_pos) {
-        u8g.drawBox(64-7, 1 + menu_pos * 8, 63+7-4, 7);
-        u8g.setDefaultBackgroundColor();
-      }
-      sprintf (j_buf, "%X %d %3d", pgm_read_byte_near(channelNames + (8 * band) + i), pgm_read_word_near(channelFreqTable + (8 * band) + i), rx5808.getVal(band, i, 100));
-      u8g.drawStr( 64-7, 8 + i * 8, j_buf);
-    }
-    if (!saved) {
-      u8g.setDefaultForegroundColor();
-      int height = counter*64/500;
-      if (height > 0)
-        u8g.drawBox(124,64-height,4,height);
-    }
-  } while ( u8g.nextPage() );
+  uint8_t chans[8];
+  for(int i=0;i<8;i++) chans[i] = band*8+i;
+  display_group(chans);
 }
 
-void display_autoscan() {
-  int band = rx5808.getfrom_top8(menu_pos) / 8;
-  int chan = rx5808.getfrom_top8(menu_pos) % 8;
-
-  u8g.setFont(u8g_font_6x10);
-  u8g.firstPage();
-  do {
-    u8g.setDefaultForegroundColor();
-    u8g.drawXBMP( 0, 0, 32, 32, bands[band]);
-    u8g.drawXBMP( 32-7, 0, 32, 32, channels[chan]);
-
-    for (int i = 0; i < MENU_ITEMS; i++) {
-      u8g.setDefaultForegroundColor();
-      if (i == menu_pos) {
-        u8g.drawBox(64-7, 1 + menu_pos * 8, 63+7-4, 7);
-        u8g.setDefaultBackgroundColor();
-      }
-      sprintf (j_buf, "%X %d %3d ", pgm_read_byte_near(channelNames + rx5808.getfrom_top8(i)), pgm_read_word_near(channelFreqTable + rx5808.getfrom_top8(i)), rx5808.getVal(rx5808.getfrom_top8(i), 100));
-      u8g.drawStr(64-7, 8 + i * 8, j_buf);
-    }
-
-    if (!saved) {
-      u8g.setDefaultForegroundColor();
-      int height = counter*64/500;
-      if (height > 0)
-        u8g.drawBox(124,64-height,4,height);
-    }
-  } while ( u8g.nextPage() );
+void display_autoscan(uint8_t menu_pos) {
+  display_group(rx5808.getTop8());
 }
 
-void display_favorites() {
-  int band = prev_last_used_chans[menu_pos] / 8;
-  int chan = prev_last_used_chans[menu_pos] % 8;
+void display_favorites(uint8_t menu_pos) {
+  display_group(prev_last_used_chans);
+}
+
+void display_group(uint8_t *group) {
+  int band = group[menu_pos] / 8;
+  int chan = group[menu_pos] % 8;
 
   u8g.setFont(u8g_font_6x10);
   u8g.firstPage();
   do {
-    if (prev_last_used_chans[menu_pos] < 40) {
+    // Display the current selected channel
+    if (group[menu_pos]<CHANNEL_MAX) {
       u8g.setDefaultForegroundColor();
       u8g.drawXBMP( 0, 0, 32, 32, bands[band]);
       u8g.drawXBMP( 32-7, 0, 32, 32, channels[chan]);
+
+      // draw the RSSI
+      u8g.drawStr(0,49,"A");
+      u8g.drawFrame(8,40,45,10);
+      u8g.drawBox(9,41,rx5808.getCurrentRSSI(0,43),8);
+
+#ifdef USE_DIVERSITY
+      u8g.drawStr(0,61,"B");
+      u8g.drawFrame(8,52,45,10);
+      u8g.drawBox(9,53,rx5808B.getCurrentRSSI(0,43),8);
+#endif
     }
 
     for (int i = 0; i < MENU_ITEMS; i++) {
-      if (prev_last_used_chans[i] >= 40) break;
+      if (group[i]>=CHANNEL_MAX)
+        break;
       u8g.setDefaultForegroundColor();
       if (i == menu_pos) {
         u8g.drawBox(64-7, 1 + menu_pos * 8, 63+7-4, 7);
         u8g.setDefaultBackgroundColor();
       }
-      sprintf (j_buf, "%X %d %3d ", pgm_read_byte_near(channelNames + prev_last_used_chans[i]), pgm_read_word_near(channelFreqTable + prev_last_used_chans[i]), rx5808.getVal(prev_last_used_chans[i], 100));
+      sprintf (j_buf, "%X %d %3d ", pgm_read_byte_near(channelNames + group[i]), pgm_read_word_near(channelFreqTable + group[i]), rx5808.getVal(group[i], 100));
       u8g.drawStr(64-7, 8 + i * 8, j_buf);
     }
 
@@ -274,4 +245,6 @@ void display_favorites() {
     }
   } while ( u8g.nextPage() );
 }
+
+
 #endif //OLED
