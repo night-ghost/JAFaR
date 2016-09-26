@@ -5,12 +5,13 @@ DIY OpenSource 40ch receiver OSD integrated
 ## This is a major refactor of MikyM0use's original code
 
 **Changes**
-* Has a favorites section which remembers the last 8 channels used ordered with the last used at the top of the list. It re-orders the list when you select a new channel.
+* Added a favorites section which remembers the last 8 channels used ordered with the last used at the top of the list. It re-orders the list when you select a new channel.
 * The scanner is continuously running in the main menu or scanner menu. This means that the RSSI values are pretty much always up to date.
 * There's a timer progress bar on the right rather than a counter.
 * Double-click (i.e. another press within 1 second) takes you back to the main menu.
 * When in a band selection menu, favorites or autoscan a single click of the buttons selects the next or previous channel respectively.
 * When a channel is selected, display the current RSSI for each receiver under the channel designator (only on the OLED display).
+* Moved all strings in OLED and OSD to PROGMEM.
 
 Make sure to use the updated TVout library from https://github.com/pkendall64/arduino-tvout as the original will cancel timer 2, which is the selection timer for this version of the receiver.
 
