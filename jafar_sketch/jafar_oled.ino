@@ -66,8 +66,8 @@ void display_init(void) { // flip screen, if required
   u8g.firstPage();
   do {
     u8g.setFont(u8g_font_8x13);
-    u8g.drawStr( 0, 20, "JAFaR Project");
-    u8g.drawStr( 0, 35, "by MikyM0use");
+    u8g.drawStrP( 0, 20, U8G_PSTR("JAFaR Project"));
+    u8g.drawStrP( 0, 35, U8G_PSTR("by MikyM0use"));
   } while ( u8g.nextPage() );
 }
 
@@ -75,14 +75,14 @@ void display_splash_rssi() {
   u8g.firstPage();
   do {
     u8g.setFont(u8g_font_8x13);
-    u8g.drawStr( 0, 20, "JAFaR Project");
-    u8g.drawStr( 0, 35, "by MikyM0use");
+    u8g.drawStrP( 0, 20, U8G_PSTR("JAFaR Project"));
+    u8g.drawStrP( 0, 35, U8G_PSTR("by MikyM0use"));
 
     u8g.setFont(u8g_font_6x10);
-    sprintf (j_buf, "RSSI MIN %d", rssi_min); //Rssi min
+    sprintf_P (j_buf, PSTR("RSSI MIN %d"), rssi_min); //Rssi min
     u8g.drawStr(0, 50, j_buf);
 
-    sprintf (j_buf, "RSSI MAX %d", rssi_max); //Rssi max
+    sprintf_P (j_buf, PSTR("RSSI MAX %d"), rssi_max); //Rssi max
     u8g.drawStr(0, 60, j_buf);
   } while ( u8g.nextPage() );
   delay(2000);
@@ -93,11 +93,11 @@ void display_mainmenu(uint8_t menu_pos) {
   u8g.setFont(u8g_font_6x10);
 
   if (last_used_chans[0]<40) {
-    sprintf (j_buf, "FAVORITES   %X %d", pgm_read_byte_near(channelNames + last_used_chans[0]), pgm_read_word_near(channelFreqTable + last_used_chans[0]));
+    sprintf_P (j_buf, PSTR("FAVORITES   %X %d"), pgm_read_byte_near(channelNames + last_used_chans[0]), pgm_read_word_near(channelFreqTable + last_used_chans[0]));
   } else {
-    sprintf (j_buf, "FAVORITES   -- ----");
+    sprintf_P (j_buf, PSTR("FAVORITES   -- ----"));
   }
-  const char *menu_strings[MENU_ITEMS] {j_buf, "BAND A", "BAND B", "BAND E", "BAND FATSHARK", "RACEBAND", "SCANNER", "AUTOSCAN"};
+  const char *menu_strings[MENU_ITEMS] {j_buf, PSTR("BAND A"), PSTR("BAND B"), PSTR("BAND E"), PSTR("BAND FATSHARK"), PSTR("RACEBAND"), PSTR("SCANNER"), PSTR("AUTOSCAN")};
 
   u8g.firstPage();
   do {
@@ -109,11 +109,14 @@ void display_mainmenu(uint8_t menu_pos) {
         u8g.setDefaultBackgroundColor();
       }
 
-      u8g.drawStr( 0, 8 + i * 8, menu_strings[i]); //menu item
+      if (i==0)
+        u8g.drawStr( 0, 8 + i * 8, j_buf); //menu item
+      else
+        u8g.drawStrP( 0, 8 + i * 8, (u8g_pgm_uint8_t *)(menu_strings[i])); //menu item
 
       if (i > 0 && i < 6) {
         //only for the "real" bands (not for scanner, autoscan etc) do we draw RSSI
-        sprintf(j_buf, "%3d", rx5808.getMaxValBand(i - 1, 100));
+        sprintf_P(j_buf, PSTR("%3d"), rx5808.getMaxValBand(i - 1, 100));
         u8g.drawStr( 80, 8 + i * 8, j_buf);
       }
     }
@@ -135,14 +138,14 @@ void display_scanner() {
 
   u8g.firstPage();
   do {
-    u8g.drawStr(FRAME_START_X, FRAME_START_Y, "BAND");
-    u8g.drawStr(FRAME_START_X + 80, FRAME_START_Y, "FREE CH");
+    u8g.drawStrP(FRAME_START_X, FRAME_START_Y, U8G_PSTR("BAND"));
+    u8g.drawStrP(FRAME_START_X + 80, FRAME_START_Y, U8G_PSTR("FREE CH"));
 
-    u8g.drawStr(FRAME_START_X + 15, FRAME_START_Y + 12, "A");
-    u8g.drawStr(FRAME_START_X + 15, FRAME_START_Y + 22, "B");
-    u8g.drawStr(FRAME_START_X + 15, FRAME_START_Y + 32, "E");
-    u8g.drawStr(FRAME_START_X + 15, FRAME_START_Y + 42, "F");
-    u8g.drawStr(FRAME_START_X + 15, FRAME_START_Y + 52, "R");
+    u8g.drawStrP(FRAME_START_X + 15, FRAME_START_Y + 12, U8G_PSTR("A"));
+    u8g.drawStrP(FRAME_START_X + 15, FRAME_START_Y + 22, U8G_PSTR("B"));
+    u8g.drawStrP(FRAME_START_X + 15, FRAME_START_Y + 32, U8G_PSTR("E"));
+    u8g.drawStrP(FRAME_START_X + 15, FRAME_START_Y + 42, U8G_PSTR("F"));
+    u8g.drawStrP(FRAME_START_X + 15, FRAME_START_Y + 52, U8G_PSTR("R"));
 
     u8g.drawLine(25, 0, 25, 60); //start
     u8g.drawLine(76, 0, 76, 60); //end
@@ -155,7 +158,7 @@ void display_scanner() {
     //computation of the min value
     for (i = 0; i < 5; i++) {
       uint16_t chan = rx5808.getMinPosBand(i);
-      sprintf (j_buf, "%x %d", pgm_read_byte_near(channelNames + chan), pgm_read_word_near(channelFreqTable + chan));
+      sprintf_P (j_buf, PSTR("%x %d"), pgm_read_byte_near(channelNames + chan), pgm_read_word_near(channelFreqTable + chan));
       u8g.drawStr(FRAME_START_X + 80, FRAME_START_Y + 10 * i + 12, j_buf);
     }
 
@@ -214,12 +217,12 @@ void display_group(uint8_t menu_pos, uint8_t *group) {
       u8g.drawXBMP( 32-7, 0, 32, 32, channels[chan]);
 
       // draw the RSSI
-      u8g.drawStr(0,49,"A");
+      u8g.drawStrP(0,49,U8G_PSTR("A"));
       u8g.drawFrame(8,40,45,10);
       u8g.drawBox(9,41,rx5808.getCurrentRSSI(0,43),8);
 
 #ifdef USE_DIVERSITY
-      u8g.drawStr(0,61,"B");
+      u8g.drawStrP(0,61,U8G_PSTR("B"));
       u8g.drawFrame(8,52,45,10);
       u8g.drawBox(9,53,rx5808B.getCurrentRSSI(0,43),8);
 #endif
@@ -233,7 +236,7 @@ void display_group(uint8_t menu_pos, uint8_t *group) {
         u8g.drawBox(64-7, 1 + menu_pos * 8, 63+7-4, 7);
         u8g.setDefaultBackgroundColor();
       }
-      sprintf (j_buf, "%X %d %3d ", pgm_read_byte_near(channelNames + group[i]), pgm_read_word_near(channelFreqTable + group[i]), rx5808.getVal(group[i], 100));
+      sprintf_P (j_buf, PSTR("%X %d %3d "), pgm_read_byte_near(channelNames + group[i]), pgm_read_word_near(channelFreqTable + group[i]), rx5808.getVal(group[i], 100));
       u8g.drawStr(64-7, 8 + i * 8, j_buf);
     }
 

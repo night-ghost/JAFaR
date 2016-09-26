@@ -26,7 +26,7 @@ void display_init(void) {
 
   //splash screen
   TV.clear_screen();
-  TV.print(0, 0, "JAFaR Project \n\n  by MikyM0use");
+  TV.printPGM(0, 0, PSTR("JAFaR Project \n\n  by MikyM0use"));
 }
 
 void display_splash_rssi(void) {
@@ -34,10 +34,10 @@ void display_splash_rssi(void) {
 
   //splash screen
   TV.clear_screen();
-  TV.print(0, 0, "JAFaR Project \n\n  by MikyM0use");
-  TV.print(0, 50, "RSSI MIN");
+  TV.printPGM(0, 0, PSTR("JAFaR Project \n\n  by MikyM0use"));
+  TV.printPGM(0, 50, PSTR("RSSI MIN"));
   TV.println(60, 50, rssi_min, DEC); //RSSI
-  TV.print(0, 60, "RSSI MAX");
+  TV.printPGM(0, 60, PSTR("RSSI MAX"));
   TV.println(60, 60, rssi_max, DEC); //RSSI
 
   TV.delay(2000);
@@ -62,11 +62,11 @@ void display_mainmenu(uint8_t menu_pos) {
 
   //last used band,freq
   if (last_used_chans[0]<40) {
-    sprintf (j_buf, "FAVORITES %X %d", pgm_read_byte_near(channelNames + last_used_chans[0]), pgm_read_word_near(channelFreqTable + last_used_chans[0]));
+    sprintf_P (j_buf, PSTR("FAVORITES %X %d"), pgm_read_byte_near(channelNames + last_used_chans[0]), pgm_read_word_near(channelFreqTable + last_used_chans[0]));
+    TV.println(3, 3 , j_buf);
   } else {
-    sprintf (j_buf, "FAVORITES -- ----");
+    TV.printPGM(3, 3 , PSTR("FAVORITES -- ----"));
   }
-  TV.println(3, 3 , j_buf);
 
   //entire menu
   TV.printPGM(3, 3 + 1 * MENU_Y_SIZE, PSTR("BAND A"));
@@ -127,7 +127,7 @@ void display_group(uint8_t menu_pos, uint8_t *group) {
   TV.draw_rect(0, 0, D_COL, D_ROW, WHITE);
 
   for (uint8_t i = 0; i < 8; i++) {
-    if (prev_last_used_chans[i]<0 || prev_last_used_chans[i]>40)
+    if (group[i]<0 || group[i]>40)
       break;
     TV.println(10, 3 + i * MENU_Y_SIZE, pgm_read_word_near(channelFreqTable + group[i]), DEC); //channel freq
     TV.println(45, 3 + i * MENU_Y_SIZE , pgm_read_byte_near(channelNames + group[i]), HEX); //channel name
