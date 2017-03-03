@@ -17,19 +17,23 @@ This file is part of Fatshark© goggle rx module project (JAFaR).
     Copyright © 2016 Michele Martinelli
   */
 
+#include <Arduino.h>
 #include <SPI.h>
-#include <Wire.h>
-#include <EEPROM.h>
+//#include <Wire.h>
+//#include <EEPROM.h>
+
+#include <stdio.h>
 
 #include "rx5808.h"
 #include "const.h"
+
 
 RX5808 rx5808(rssiA, SPI_CSA);
 #ifdef USE_DIVERSITY
 RX5808 rx5808B(rssiB, SPI_CSB);
 #endif
 
-volatile int counter;
+volatile uint16_t counter;
 volatile bool buttonPressed;
 volatile bool timerExpired;
 
@@ -51,6 +55,8 @@ enum modes {
 
 char j_buf[40];
 
+
+
 #ifdef USE_OLED
 
 #include "U8glib.h"
@@ -63,12 +69,22 @@ U8GLIB_SSD1306_128X64 u8g(8, A1, A4, 11 , 13); //CLK, MOSI, CS, DC, RESET
 
 #else //USE OSD
 
-#include <TVout.h>
-#include <TVoutfonts/fontALL.h>
 
+
+
+#include <TVout.h>
+//#include <TVoutfonts/fontALL.h>
+#include <font4x6.h>
+#include <font6x8.h>
 TVout TV;
 
 #endif //USE OSD
+
+#include "jafar_osd.h"
+#include "jafar_oled.h"
+
+
+void timer_proc();
 
 //////********* SETUP ************////////////////////
 void setup() {
@@ -94,6 +110,7 @@ void setup() {
 
   display_init();
 
+
   //RX module init
   rx5808.init();
 #ifdef USE_DIVERSITY
@@ -110,9 +127,8 @@ void setup() {
   flag_first_pos = readSwitch();
 #endif
 
-  for(int i=0 ; i<8 ; i++) {
-    last_used_chans[i] = EEPROM.read(EEPROM_ADDR_LAST_CHAN_ID + i);
-  }
+    eeprom_read_len(last_used_chans, EEPROM_ADDR_LAST_CHAN_ID, sizeof(last_used_chans));
+    
 
   buttonPressed = false;
   pciSetup(2);
@@ -121,12 +137,12 @@ void setup() {
 
   menu_pos = readSwitch();
   mode = MAINMENU;
-  counter = 500;
 
   saved = false;
 
   display_mainmenu(menu_pos);
 
+#if 1
   cli();
   //set timer2 interrupt at ~100Hz
   TCCR2A = 0;// set entire TCCR2A register to 0
@@ -140,9 +156,22 @@ void setup() {
   TCCR2B |= (1 << CS20) | (1 << CS21) | (1 << CS22);
   // enable timer compare interrupt
   TIMSK2 |= (1 << OCIE2A);
+
+#else 
+    TV.set_vsync_callback(timer_proc);
+#endif
+
+  counter = 500; // 5s
   timerExpired = false;
+
+
   sei();
 }
+
+void _delay(uint32_t t){
+    TV.delay(t);
+}
+
 
 void pciSetup(byte pin) {
   *digitalPinToPCMSK(pin) |= bit (digitalPinToPCMSKbit(pin));  // enable pin
@@ -154,14 +183,23 @@ ISR(PCINT2_vect) {
   buttonPressed = true;
 }
 
+#if 1
 ISR(TIMER2_COMPA_vect) {
   if (!timerExpired && counter) {
     timerExpired = (--counter == 0);
   }
 }
+#else
+void timer_proc(){
+  if (!timerExpired && counter) {
+    counter -=2;        
+    timerExpired = (counter <= 0);
+  }
+}
+#endif
 
 void select_freq(uint8_t channel) {
-  uint16_t freq = pgm_read_word_near(channelFreqTable + channel);
+  uint16_t freq = pgm_read_word(channelFreqTable + channel);
   rx5808.setFreq(freq);
 #ifdef USE_DIVERSITY
   rx5808B.setFreq(freq);
@@ -284,9 +322,8 @@ void updateLastUsed(uint8_t channel) {
   }
   memmove(last_used_chans+1, last_used_chans, pos);
   last_used_chans[0] = channel;
-  for(int i=0 ; i<8 ; i++) {
-    EEPROM.write(EEPROM_ADDR_LAST_CHAN_ID, last_used_chans[i]);
-  }
+  eeprom_write_len(last_used_chans, EEPROM_ADDR_LAST_CHAN_ID, sizeof(last_used_chans));
+  
 }
 
 void redisplay() {

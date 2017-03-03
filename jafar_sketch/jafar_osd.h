@@ -19,14 +19,18 @@ This file is part of Fatshark© goggle rx module project (JAFaR).
 
 #ifndef USE_OLED
 
+
+//uint8_t buffer[D_COL*D_ROW/8];
+
 void display_init(void) {
   //tv init
+//  TV.begin(PAL, D_COL, D_ROW, buffer);
   TV.begin(PAL, D_COL, D_ROW);
   TV.select_font(font6x8);
 
   //splash screen
   TV.clear_screen();
-  TV.printPGM(0, 0, PSTR("JAFaR Project \n\n  by MikyM0use"));
+  TV.printPGM(0, 0, PSTR("JAFaR Project \n\n  by MikyM0use & Night Ghost"));
 }
 
 void display_splash_rssi(void) {
@@ -34,7 +38,7 @@ void display_splash_rssi(void) {
 
   //splash screen
   TV.clear_screen();
-  TV.printPGM(0, 0, PSTR("JAFaR Project \n\n  by MikyM0use"));
+  TV.printPGM(0, 0, PSTR("JAFaR Project"));
   TV.printPGM(0, 50, PSTR("RSSI MIN"));
   TV.println(60, 50, rssi_min, DEC); //RSSI
   TV.printPGM(0, 60, PSTR("RSSI MAX"));
@@ -106,21 +110,6 @@ void display_scanner_update(int16_t channel) {
   TV.draw_rect(10 + 2 * channel, 10 + BIN_H - rx5808.getRssi(channelIndex) , 2, rx5808.getRssi(channelIndex), WHITE, WHITE);
 }
 
-
-void display_bandmenu(uint8_t menu_pos, uint8_t band) {
-  uint8_t chans[8];
-  for(int i=0;i<8;i++) chans[i] = band*8+i;
-  display_group(menu_pos, chans);
-}
-
-void display_autoscan(uint8_t menu_pos) {
-  display_group(menu_pos, rx5808.getTop8());
-}
-
-void display_favorites(uint8_t menu_pos) {
-  display_group(menu_pos, prev_last_used_chans);
-}
-
 void display_group(uint8_t menu_pos, uint8_t *group) {
   TV.clear_screen();
   TV.select_font(font6x8);
@@ -137,4 +126,20 @@ void display_group(uint8_t menu_pos, uint8_t *group) {
 
   TV.draw_rect(2, 2 + menu_pos * MENU_Y_SIZE, D_COL-10, 8, WHITE, INVERT); //current selection
 }
+
+
+void display_bandmenu(uint8_t menu_pos, uint8_t band) {
+  uint8_t chans[8];
+  for(int i=0;i<8;i++) chans[i] = band*8+i;
+  display_group(menu_pos, chans);
+}
+
+void display_autoscan(uint8_t menu_pos) {
+  display_group(menu_pos, rx5808.getTop8());
+}
+
+void display_favorites(uint8_t menu_pos) {
+  display_group(menu_pos, prev_last_used_chans);
+}
+
 #endif //not USE_OLED

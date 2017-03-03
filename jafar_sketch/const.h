@@ -20,19 +20,21 @@ This file is part of Fatshark© goggle rx module project (JAFaR).
 #ifndef const_h
 #define const_h
 
+#include "compat.h"
+
 //#define FORCE_FIRST_MENU_ITEM //force always the first menu item (last freq used)
 //#define STANDALONE
 
 //ONLY ONE OF THE FOLLOWING:
 #define USE_DIVERSITY
-#define USE_OLED
+//#define USE_OLED
 
-#define USE_I2C_OLED
+//#define USE_I2C_OLED
 
 //DEBUG STUFF
 //#define DEBUG
 //#define ENABLE_RSSILOG
-//#define FLIP_SCREEN
+#define FLIP_SCREEN
 
 #define CH1 2
 #define CH2 3
@@ -99,5 +101,17 @@ const uint8_t channelNames[] PROGMEM = {
   0xF1, 0xF2, 0xF3, 0xF4, 0xF5, 0xF6, 0xF7, 0xF8,
   0xC1, 0xC2, 0xC3, 0xC4, 0xC5, 0xC6, 0xC7, 0xC8
 };
+
+
+void NOINLINE eeprom_read_len(byte *p, uint16_t e, uint16_t l);
+NOINLINE void eeprom_write_len(byte *p, uint16_t e, uint16_t l);
+
+uint16_t  eeprom_read_word(uint16_t addr);
+void eeprom_write_word(uint16_t addr, uint16_t w);
+
+void pciSetup(byte pin);
+uint8_t readSwitch();
+void cancelOrSelect(uint8_t channel);
+void updateLastUsed(uint8_t channel);
 
 #endif

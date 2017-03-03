@@ -1,3 +1,7 @@
+The original pkendall64 version not works or even not compiles for me so this is easy-build version with almost the same functions
+
+## pkendall64's original README follows
+
 # JAFaR (Just Another Fatshark Receiver Module)
 
 DIY OpenSource 40ch receiver OSD integrated

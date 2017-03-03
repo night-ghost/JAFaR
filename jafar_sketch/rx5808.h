@@ -26,9 +26,11 @@ This file is part of Fatshark© goggle rx module project (JAFaR).
 #define CHANNEL_MAX 40
 #define CHANNEL_MIN 0
 
+extern void _delay(uint32_t t);
+
 //default values used for calibration
-uint16_t rssi_min = 1024;
-uint16_t rssi_max = 0;
+extern uint16_t rssi_min;
+extern uint16_t rssi_max;
 
 class RX5808
 {

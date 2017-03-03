@@ -17,10 +17,15 @@ This file is part of Fatshark© goggle rx module project (JAFaR).
     Copyright © 2016 Michele Martinelli
   */
 
-#include <Wire.h>
-#include <EEPROM.h>
+//#include <Wire.h>
+//#include <EEPROM.h>
 #include "rx5808.h"
 #define RSSI_THRESH (scanVec[getMaxPos()]-5) //strong channels are near to the global max
+
+
+
+uint16_t rssi_min = 1024;
+uint16_t rssi_max = 0;
 
 RX5808::RX5808(uint16_t RSSIpin, uint16_t CSpin) {
   _rssiPin = RSSIpin;
@@ -166,8 +171,8 @@ void RX5808::init() {
    */
   SPCR=(1<<SPE)|(1<<DORD)|(1<<MSTR);
 
-  rssi_min = ((EEPROM.read(EEPROM_ADR_RSSI_MIN_H) << 8) | (EEPROM.read(EEPROM_ADR_RSSI_MIN_L)));
-  rssi_max = ((EEPROM.read(EEPROM_ADR_RSSI_MAX_H) << 8) | (EEPROM.read(EEPROM_ADR_RSSI_MAX_L)));
+  rssi_min = eeprom_read_word(EEPROM_ADR_RSSI_MIN_L);
+  rssi_max = eeprom_read_word(EEPROM_ADR_RSSI_MAX_L);
 
   /*
     digitalWrite(_csPin, LOW);
@@ -203,7 +208,7 @@ void RX5808::scan(uint16_t norm_min, uint16_t norm_max) {
     Serial.print(freq, DEC);
     Serial.print("\t");
     Serial.println(rssi, DEC);
-    delay(500);
+    _delay(500);
 #endif
 
     rssi = constrain(rssi, rssi_min, rssi_max);
@@ -233,16 +238,16 @@ void RX5808::_calibrationScan() {
 void RX5808::_wait_rssi() {
   // 30ms will to do a 32 channels scan in 1 second
 #define MIN_TUNE_TIME 30
-  delay(MIN_TUNE_TIME);
+  _delay(MIN_TUNE_TIME);
 }
 
 //simple avg of 4 value
 uint16_t RX5808::_readRSSI() {
   volatile uint32_t sum = 0;
-  delay(9);
+  _delay(9);
   sum = analogRead(_rssiPin);
   sum += analogRead(_rssiPin);
-  delay(1);
+  _delay(1);
   sum += analogRead(_rssiPin);
   sum += analogRead(_rssiPin);
   return sum / 4.0;
@@ -268,18 +273,14 @@ void RX5808::calibration() {
     rssi_setup_max = max(rssi_setup_max, maxValue); //?maxValue:rssi_setup_max;
   }
 
-  // save 16 bit
-  EEPROM.write(EEPROM_ADR_RSSI_MIN_L, (rssi_setup_min & 0xff));
-  EEPROM.write(EEPROM_ADR_RSSI_MIN_H, (rssi_setup_min >> 8));
-  // save 16 bit
-  EEPROM.write(EEPROM_ADR_RSSI_MAX_L, (rssi_setup_max & 0xff));
-  EEPROM.write(EEPROM_ADR_RSSI_MAX_H, (rssi_setup_max >> 8));
+  eeprom_write_word(EEPROM_ADR_RSSI_MIN_L, rssi_setup_min);
+  eeprom_write_word(EEPROM_ADR_RSSI_MAX_L, rssi_setup_max);
 
-  rssi_min = ((EEPROM.read(EEPROM_ADR_RSSI_MIN_H) << 8) | (EEPROM.read(EEPROM_ADR_RSSI_MIN_L)));
-  rssi_max = ((EEPROM.read(EEPROM_ADR_RSSI_MAX_H) << 8) | (EEPROM.read(EEPROM_ADR_RSSI_MAX_L)));
+  rssi_min = eeprom_read_word(EEPROM_ADR_RSSI_MIN_L);
+  rssi_max = eeprom_read_word(EEPROM_ADR_RSSI_MAX_L);
 
 
-  delay(3000);
+  _delay(3000);
 
   return;
 }

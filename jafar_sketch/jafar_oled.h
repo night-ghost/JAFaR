@@ -85,7 +85,7 @@ void display_splash_rssi() {
     sprintf_P (j_buf, PSTR("RSSI MAX %d"), rssi_max); //Rssi max
     u8g.drawStr(0, 60, j_buf);
   } while ( u8g.nextPage() );
-  delay(2000);
+  TV.delay(2000);
 }
 
 void display_mainmenu(uint8_t menu_pos) {
